@@ -1,8 +1,8 @@
 node_modules
 .DS_Store
 dist
-artfy_web
-artfy_web.zip
+artfy-web
+artfy-web.zip
 .npmrc
 .cache
 

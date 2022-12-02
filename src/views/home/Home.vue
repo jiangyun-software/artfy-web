@@ -6,6 +6,8 @@
     <AllApplication />
     <Scene />
     <EasyApi />
+    <Advantage />
+    <ConcatBootom />
     <Concat />
   </div>
 </template>
@@ -18,10 +20,12 @@
   import AllApplication from './AllApplication.vue';
   import Scene from './Scene.vue';
   import EasyApi from './EasyApi.vue';
+  import Advantage from './Advantage.vue';
+  import ConcatBootom from './ConcatBootom.vue';
 
   export default defineComponent({
     name: 'Home',
-    components: { Top, Concat, Example, Partner, AllApplication, Scene, EasyApi },
+    components: { Top, Concat, Example, Partner, AllApplication, Scene, EasyApi, Advantage, ConcatBootom },
     setup() {
       return {};
     },
