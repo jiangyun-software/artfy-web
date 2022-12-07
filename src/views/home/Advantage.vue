@@ -88,6 +88,7 @@
 
           .content-text {
             position: absolute;
+            width: 100%;
             padding: 24px;
             bottom: -60px;
             background-color: white;
@@ -103,6 +104,7 @@
               font-size: 14px;
               line-height: 20px;
               margin-top: 12px;
+              visibility: hidden;
             }
           }
         }
@@ -120,6 +122,7 @@
               text-align: left;
             }
             .content-text-desc {
+              visibility: visible;
               color: rgba(0, 0, 0, 0.7);
             }
           }
@@ -133,6 +136,7 @@
               text-align: left;
             }
             .content-text-desc {
+              visibility: visible;
               color: rgba(0, 0, 0, 0.7);
             }
           }
@@ -146,6 +150,7 @@
               text-align: left;
             }
             .content-text-desc {
+              visibility: visible;
               color: rgba(255, 255, 255, 0.7);
             }
           }
@@ -158,11 +163,11 @@
               text-align: left;
             }
             .content-text-desc {
+              visibility: visible;
               color: rgba(255, 255, 255, 0.7);
             }
           }
         }
-
       }
     }
   }

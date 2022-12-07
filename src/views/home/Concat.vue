@@ -53,7 +53,7 @@
   .concat {
     position: fixed;
     top: 50%;
-    right: 80px;
+    right: 40px;
     z-index: 999;
 
     .concat-item {

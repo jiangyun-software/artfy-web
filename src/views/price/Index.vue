@@ -16,7 +16,7 @@
           <RadioGroup v-model:value="selectComboIndex" style="display: block">
             <div v-for="(item, index) in comboList" :key="item.id" class="combo-item">
               <Radio :value="index">{{ item.point }}</Radio>
-              <div>{{ item.amount }}</div>
+              <div class="amount">{{ item.amount }}</div>
               <div>￥{{ item.average }}/点</div>
             </div>
           </RadioGroup>
@@ -235,6 +235,10 @@
             margin: 14px 0px;
             font-size: 14px;
             color: rgba(0, 0, 0, 0.7);
+
+            > * {
+              flex: 1;
+            }
           }
         }
         .buy {

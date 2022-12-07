@@ -48,6 +48,12 @@ export default {
           title: '关键字作画',
         },
       },
+      AIPainting: {
+        title: 'AI作画',
+        painting: {
+          title: 'AI作画',
+        },
+      },
     },
     case: {
       graphicDesign: {
