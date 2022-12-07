@@ -32,7 +32,11 @@ export default {
           title: '智能美颜',
         },
       },
-      videoProcessing: {},
+      videoProcessing: {
+        videoTranslation: {
+          title: '视频翻译',
+        },
+      },
       argGeneration: {
         anime: {
           title: '人像卡通化',

@@ -92,6 +92,15 @@ export const myRoutes: AppRouteModule[] = [
         },
       },
       {
+        path: 'product/videoProcessing/videoTranslation',
+        name: 'VideoTranslation',
+        component: () => import('/@/views/product/videoProcessing/VideoTranslation.vue'),
+        meta: {
+          title: t('jy.page.product.videoProcessing.videoTranslation.title'),
+          footer: true,
+        },
+      },
+      {
         path: 'product/artGeneration/anime',
         name: 'Anime',
         component: () => import('/@/views/product/artGeneration/Anime.vue'),

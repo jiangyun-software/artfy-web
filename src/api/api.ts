@@ -229,6 +229,22 @@ export function faceBeautyApi(params) {
   });
 }
 
+// 视频翻译
+export function translateApi(params) {
+  return defHttp.post<RestResult>({
+    url: '/artfy/videoProcessing/translate',
+    data: params,
+  });
+}
+
+// 获取视频翻译结果
+export function translateResultApi(params) {
+  return defHttp.post<RestResult>({
+    url: '/artfy/videoProcessing/translateResult',
+    data: params,
+  });
+}
+
 // 创建订单
 export function createOrderApi(params) {
   return defHttp.post<RestResult>({

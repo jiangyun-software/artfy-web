@@ -39,6 +39,7 @@
               <div class="product-group-item">人像打码</div>
               <div class="product-group-item">风格迁移</div>
               <div class="product-group-item">视频抠图</div>
+              <router-link to="/product/videoProcessing/videoTranslation"><div class="product-group-item">视频翻译</div></router-link>
             </div>
           </div>
           <div class="product-group">
