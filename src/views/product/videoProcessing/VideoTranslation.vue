@@ -14,6 +14,7 @@
               <span>提交</span>
             </Button>
           </div>
+          <div class="api" v-show="isShow">{{ processStatusMap[processStatus] }}</div>
         </div>
       </div>
     </div>
@@ -37,6 +38,53 @@
     components: { Button, Input, QrcodeVue, Modal, LoadingOutlined, Progress, ImageCompare, Slider },
     setup() {
       const url = ref('');
+
+      var isShow = ref(false);
+
+      var processStatus = ref('');
+
+      const processStatusMap = {
+        '-2': '素材准备中',
+        '-1': '默认，需要进行处理',
+        '0': '工程文件构建完成，处理中',
+        '1': '成功',
+        '2': 'url解析失败',
+        '3': '下载失败',
+        '4': 'Ocr调用失败',
+        '5': '视频时长超过设定限制',
+        '6': '翻译Pro调用失败',
+        '7': '翻译Pro处理失败',
+        '8': '深尚时长超过限制',
+        '9': '人工取消发布',
+        '10': '工程文件构造失败',
+        '11': '成功',
+        '12': 'ASR处理失败',
+        '13': '卡点处理失败',
+        '14': '素材osskey不存在',
+        '15': '作为素材的作品处理失败',
+        '16': '视频最后0.2秒读不出来，可能存在损坏',
+        '17': '下载的文件不存在',
+        '18': '视频处理超时',
+        '19': '文件可能部分下载损坏',
+
+        '20': '视频擦除处理失败',
+        '21': '语音分离失败',
+        '22': '远程服务任务发送失败',
+        '23': '远程处理超时',
+        '43': '未知错误',
+        '44': '无计可施 无可救药',
+        '45': '尝试处理次数过多',
+        '70': '剪辑次数处理资源耗尽',
+        '71': '基础字符处理资源耗尽',
+        '72': '高级字符处理资源耗尽',
+        '80': '剪辑次数处理资源耗尽，锁住作品等待充值解锁',
+        '81': '基础字符处理资源耗尽，锁住作品等待充值解锁',
+        '82': '高级字符处理资源耗尽，锁住作品等待充值解锁',
+        '98': '存储空间资源耗尽',
+        '99': '超出素材时长限制',
+        '100': '超出素材大小限制',
+        '111': '处理超时',
+      };
 
       const videoInfo = reactive({
         idProject: '',
@@ -93,25 +141,29 @@
       //视频翻译
       const processing = ref(false);
       const process = () => {
-        processing.value = true;
-        translateApi(proparams).then((res) => {
-          processing.value = false;
-          if (res.code == 200 || res.msg == 'success') {
-            videoInfo.idProject = res.data.idProject;
-            videoInfo.dataList = res.data.dataList;
-            idProjectsparams.idProjects[0] = res.data.idProject;
-            idProjectsparams.idWorks[0] = res.data.dataList[0].id;
-            message.success('视频翻译' + res.msg);
-            //message.success('视频翻译 callback ' + res.callback);
-
-            let timer = setInterval(() => {
-              fun(timer);
-            }, 5000);
-            // window.setInterval(() => {
-            //   setTimeout(processResult, 0);
-            // }, 30000);
-          }
-        });
+        if (isShow.value == true) {
+          return;
+        } else {
+          processing.value = true;
+          translateApi(proparams).then((res) => {
+            processing.value = false;
+            if (res.code == 200 || res.msg == 'success') {
+              videoInfo.idProject = res.data.idProject;
+              videoInfo.dataList = res.data.dataList;
+              idProjectsparams.idProjects[0] = res.data.idProject;
+              idProjectsparams.idWorks[0] = res.data.dataList[0].id;
+              message.success('提交成功');
+              //message.success('视频翻译 callback ' + res.callback);
+              isShow.value = true;
+              let timer = setInterval(() => {
+                fun(timer);
+              }, 5000);
+              // window.setInterval(() => {
+              //   setTimeout(processResult, 0);
+              // }, 30000);
+            }
+          });
+        }
       };
 
       const fun = (timer) => {
@@ -121,9 +173,11 @@
             //message.success('视频翻译状态' + res.msg);
             Resultprocessing.value = false;
             if (res.code == 200 || res.msg == 'success') {
+              processStatus.value = res.data.content[0].processStatus;
               if (res.data.content[0].processStatus == 1) {
                 //成功
-                message.success(res.msg);
+                message.success('视频翻译' + res.msg);
+                isShow.value = false;
                 //message.success(res.data.content[0].videoUrl);
                 // 停止定时器
                 clearInterval(timer);
@@ -131,6 +185,7 @@
                 url.value = res.data.content[0].videoUrl;
               } else {
                 //未成功
+                isShow.value = true;
                 //message.success(res.data.content[0].url + '开始: ' + res.data.content[0].videoUrl + '素材准备中 ' + res.data.content[0].processStatus);
               }
             }
@@ -141,6 +196,7 @@
       //视频翻译
       const Resultprocessing = ref(false);
       const processResult = () => {
+        isShow.value = true;
         Resultprocessing.value = true;
         translateResultApi(params).then((res) => {
           Resultprocessing.value = false;
@@ -165,6 +221,9 @@
         Resultprocessing,
         fun,
         url,
+        isShow,
+        processStatus,
+        processStatusMap,
       };
     },
   });
@@ -240,6 +299,13 @@
             .paste-input::-webkit-input-placeholder {
               font-size: 18px;
             }
+          }
+          .api {
+            color: red;
+            font-size: 18px;
+            margin-top: 16px;
+            cursor: pointer;
+            //display: none;
           }
         }
       }
