@@ -8,6 +8,46 @@
         <div class="right">
           <div class="title">视频翻译</div>
           <div class="description">mp4, avi, mkv等视频格式, 400M以内</div>
+          <!---->
+          <ul role="menu" class="el-menu el-menu--inline" data-old-padding-top="" data-old-padding-bottom="" data-old-overflow="" style="">
+            <div class="el-collapse-content">
+              <div class="i_editor_h4">选择翻译语言</div>
+              <select class="selectlang" v-model="selectsourceLang">
+                <option disabled selected style="display: block">请选择源语言</option>
+                <option v-for="(item, index) in sourceLang" :key="index" :value="item.code">{{ item.description }}</option>
+              </select>
+              <span>-></span>
+              <select class="selectlang" v-model="selectlang">
+                <option disabled selected style="display: block">请选择目标语言</option>
+                <option v-for="(item, index) in lang" :key="index" :value="item.code">{{ item.description }}</option>
+              </select>
+
+              <div class="i_editor_h4">配音和字幕选项</div>
+              <div class="el-select my_el_select">
+                <select class="selectlang" v-model="selectSet">
+                  <option value="0">AI配音并生成字幕</option>
+                  <option value="1">仅AI配音</option>
+                  <option value="2">仅生成字幕</option>
+                </select>
+              </div>
+              <!-- -->
+              <div class="combo">
+                <div class="combo-list" style="width: 200px; height: 220px; overflow-y: auto">
+                  <RadioGroup v-model:value="selectComboIndex" style="display: block">
+                    <div v-for="(item, index) in comboList" :key="index" class="combo-item">
+                      <Radio :value="index">{{ item }}</Radio>
+                      <div>语音列表 {{ index }}</div>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </div>
+              <!---->
+              <h4 class="i_editor_h4">
+                <label class="el-checkbox is-checked" style="margin-right: 5px"> <input type="checkbox" v-model="removeBgAudio" aria-hidden="false" true-value="1" false-value="0" class="el-checkbox__original" /> </label>原视频静音
+              </h4>
+            </div>
+          </ul>
+          <!---->
           <div class="paste-wrap"><Input v-model:value="proparams.urls[0]" class="paste-input" placeholder="CTRL+V粘贴URL" /></div>
           <div class="btn-group">
             <Button class="btn-item pcupload btn-upload" @click="process()">
@@ -22,7 +62,7 @@
 </template>
 <script lang="ts">
   import { defineComponent, reactive, ref, computed, onBeforeMount } from 'vue';
-  import { Button, Input, Progress, Modal, message, Slider } from 'ant-design-vue';
+  import { Button, Input, Progress, Modal, message, Slider, Radio, RadioGroup } from 'ant-design-vue';
   import imgDivider from '/@/assets/images/img-divider.png';
   import { LoadingOutlined } from '@ant-design/icons-vue';
   import deleteIcon from '/@/assets/svg/delete.svg';
@@ -35,13 +75,93 @@
 
   export default defineComponent({
     name: 'VideoTranslation',
-    components: { Button, Input, QrcodeVue, Modal, LoadingOutlined, Progress, ImageCompare, Slider },
+    components: { Button, Input, Radio, RadioGroup, QrcodeVue, Modal, LoadingOutlined, Progress, ImageCompare, Slider },
     setup() {
       const url = ref('');
 
       var isShow = ref(false);
 
       var processStatus = ref('');
+      //是否需要删除背景声
+      var removeBgAudio = ref(false);
+      //是否开启字幕
+      var wyNeedText = ref('');
+
+      const selectComboIndex = ref(0);
+
+      const sourceLang = [
+        { code: 'cn', description: '中文' },
+        { code: 'en', description: '英文' },
+        { code: 'ja', description: '日语' },
+        { code: 'ru', description: '俄语' },
+        { code: 'fr', description: '法语' },
+        { code: 'de', description: '德语' },
+        { code: 'id', description: '印尼语' },
+        { code: 'hi', description: '印地语' },
+        { code: 'pt', description: '葡萄牙语' },
+        { code: 'es', description: '西班牙语' },
+        { code: 'ar', description: '阿拉伯语' },
+        { code: 'it', description: '意大利语' },
+        { code: 'th', description: '泰语' },
+        { code: 'vi', description: '越南语' },
+        { code: 'ko', description: '韩语' },
+      ];
+
+      const lang = [
+        { code: 'zh', description: '中文' },
+        { code: 'en', description: '英文' },
+        { code: 'ja', description: '日语' },
+        { code: 'ko', description: '韩语' },
+        { code: 'pt', description: '葡萄牙语' },
+        { code: 'fr', description: '法语' },
+        { code: 'es', description: '西班牙语' },
+        { code: 'ar', description: '阿拉伯语' },
+        { code: 'vi', description: '越南语' },
+        { code: 'th', description: '泰语' },
+        { code: 'de', description: '德语' },
+        { code: 'ru', description: '俄语' },
+        { code: 'it', description: '意大利语' },
+        { code: 'id', description: '印尼语' },
+        { code: 'hi', description: '印地语' },
+        { code: 'tr', description: '土耳其语' },
+        { code: 'fil', description: '菲律宾语' },
+        { code: 'ms', description: '马来西亚语' },
+        { code: 'km', description: '高棉语' },
+      ];
+
+      var selectsourceLang = ref('');
+
+      var selectlang = ref('');
+
+      var selectSet = ref('0');
+
+      const comboList = {
+        '38': '标准男声-中文(普通话)',
+        '39': '标准女声-中文(普通话)',
+        '40': '标准男声-英国',
+        '41': '标准女声-英国',
+        '42': '标准男声-日本',
+        '43': '标准女声-日本',
+        '44': '标准男声-印尼',
+        '45': '标准女声-印尼',
+        '46': '标准男声-俄罗斯',
+        '47': '标准女声-俄罗斯',
+        '48': '标准男声-德国',
+        '49': '标准女声-德国',
+        '50': '标准男声-法国',
+        '51': '标准女声-法国',
+        '52': '标准男声-西班牙',
+        '53': '标准女声-西班牙',
+        '54': '标准男声-沙特阿拉伯',
+        '55': '标准女声-沙特阿拉伯',
+        '56': '标准男声-印度',
+        '57': '标准女声-印度',
+        '58': '标准男声-葡萄牙',
+        '59': '标准女声-葡萄牙',
+        '60': '标准男声-泰国',
+        '61': '标准男声-美国',
+        '62': '标准女声-美国',
+      };
 
       const processStatusMap = {
         '-2': '素材准备中',
@@ -66,7 +186,6 @@
         '17': '下载的文件不存在',
         '18': '视频处理超时',
         '19': '文件可能部分下载损坏',
-
         '20': '视频擦除处理失败',
         '21': '语音分离失败',
         '22': '远程服务任务发送失败',
@@ -97,7 +216,7 @@
       });
 
       const params = reactive({
-        urls: [],
+        urls: [] as any,
         srcLang: 'zh-cmn-Hans-CN',
         tgtLang: 'en-US',
         needChineseOcclude: '0',
@@ -116,10 +235,10 @@
       });
 
       const proparams = reactive({
-        urls: [],
+        urls: [] as any,
         voice: 2,
-        wyVoiceParam: '{"id":62}',
-        lang: 'en',
+        wyVoiceParam: '{"id":43}',
+        lang: 'ja',
         sourceLang: 'cn',
         removeBgAudio: 0,
         needChineseOcclude: '1',
@@ -137,6 +256,14 @@
         uid: '',
         wyNeedText: 1,
       });
+      //提取url
+      const getStrUrl = () => {
+        var s = [];
+        var reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-)+)/g;
+        var reg = /(https?|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g;
+        s = proparams.urls[0].match(reg);
+        proparams.urls[0] = s && s.length ? s[0] : null;
+      };
 
       //视频翻译
       const processing = ref(false);
@@ -144,6 +271,28 @@
         if (isShow.value == true) {
           return;
         } else {
+          getStrUrl();
+          message.success('提交成功');
+          //message.success('提交selectlang :' + selectlang.value + ' selectsourceLang:' + selectsourceLang.value + ' selectComboIndex:' + selectComboIndex.value);
+
+          proparams.lang = selectlang.value;
+          proparams.sourceLang = selectsourceLang.value;
+          proparams.wyVoiceParam = '{"id":' + selectComboIndex.value + '}';
+          if (removeBgAudio.value) {
+            proparams.removeBgAudio = 1;
+          } else {
+            proparams.removeBgAudio = 0;
+          }
+          if (selectSet.value == '0') {
+            proparams.wyNeedText = 1;
+            proparams.voice = 2;
+          } else if (selectSet.value == '1') {
+            proparams.wyNeedText = 0;
+          } else if (selectSet.value == '2') {
+            proparams.wyNeedText = 1;
+            proparams.voice = 3;
+          }
+
           processing.value = true;
           translateApi(proparams).then((res) => {
             processing.value = false;
@@ -224,6 +373,16 @@
         isShow,
         processStatus,
         processStatusMap,
+        getStrUrl,
+        selectlang,
+        selectsourceLang,
+        sourceLang,
+        lang,
+        selectComboIndex,
+        comboList,
+        removeBgAudio,
+        wyNeedText,
+        selectSet,
       };
     },
   });
@@ -325,5 +484,9 @@
       cursor: pointer;
       font-size: 0px;
     }
+  }
+  .selectlang {
+    //border: 1px;
+    border-width: 1px;
   }
 </style>
