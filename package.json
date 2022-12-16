@@ -57,8 +57,10 @@
     "sortablejs": "^1.14.0",
     "vue": "^3.2.21",
     "vue-i18n": "^9.1.9",
+    "vue-masonry": "^0.16.0",
     "vue-router": "^4.0.12",
-    "vue-types": "^4.1.1"
+    "vue-types": "^4.1.1",
+    "vue-waterfall-easy": "^2.4.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^14.1.0",

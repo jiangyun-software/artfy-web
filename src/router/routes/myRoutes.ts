@@ -181,6 +181,25 @@ export const myRoutes: AppRouteModule[] = [
           footer: true,
         },
       },
+      {
+        path: 'aiPainting',
+        name: 'aiPainting',
+        component: () => import('/@/views/product/AIPainting/Index.vue'),
+        meta: {
+          title: t('jy.page.product.AIPainting.title'),
+        },
+        children: [
+          {
+            path: 'painting',
+            name: 'painting',
+            component: () => import('/@/views/product/AIPainting/Painting.vue'),
+            meta: {
+              title: t('jy.page.product.AIPainting.painting.title'),
+              footer: true,
+            },
+          },
+        ],
+      },
     ],
   },
   {
