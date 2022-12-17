@@ -3,21 +3,21 @@
     <div class="top">
       <div style="width: 100%; position: relative">
         <div style="display: flex">
-          <div class="setting"><img class="settingIcon" :src="settingIcon" alt="" /><span class="setting-text">参数设置</span><img class="arrowIcon" :src="arrowIcon" /></div>
-          <div class="keyword"><input v-model="settingParams.keyword" /><img class="icon" :src="randomIcon" /></div>
-          <button class="submit">立即生成<span class="point">2点</span></button>
+          <div class="setting" :class="{ active: settingShow }" @click="settingShow = !settingShow"><img class="settingIcon" :src="settingIcon" alt="" /><span class="setting-text">参数设置</span><img class="arrowIcon" :src="arrowIcon" /></div>
+          <div class="keyword"><input v-model="settingParams.keyword" placeholder="请输入你想要的图片描述" /><img class="icon" :src="randomGreenIcon" /></div>
+          <button class="submit" @click="submit">立即生成<span class="point">2点</span></button>
         </div>
-        <div class="setting-content">
+        <div class="setting-content" v-show="settingShow">
           <div class="setting-title">
             <div class="divider-left"></div>
             <div>风格选择</div>
             <div class="setting-style-groups">
-              <div v-for="item in style" :key="item.id" class="setting-style-tab" :class="{ active: item.active }" @click="changeStyleTab(item)">{{ item.text }}</div>
+              <div v-for="item in style" :key="item.id" class="setting-style-tab" :class="{ active: item.active }" @click="changeStyleTab(item)">{{ item.label }}</div>
             </div>
           </div>
           <div class="setting-style-content">
-            <div v-for="item1 in style.find((item) => item.active).list" :key="item1.id" class="setting-style-item" :class="{ active: item1.active }" @click="changeStyleItem(item1)">
-              <img class="setting-style-item-img" :src="item1.img" alt="" />
+            <div v-for="item1 in style.find((item) => item.active)?.children || []" :key="item1.id" class="setting-style-item" :class="{ active: item1.active }" @click="changeStyleItem(item1)">
+              <img class="setting-style-item-img" :src="item1.image" alt="" />
               <div class="setting-style-item-label">{{ item1.label }}</div>
             </div>
           </div>
@@ -39,46 +39,49 @@
             <div class="setting-proportion-right">
               <div class="setting-title"><div class="divider-left"></div>生成数量</div>
               <div class="setting-quantity">
-                <div v-for="item in quantity" :key="item.quantity" class="setting-quantity-item" :class="{ active: item.active }" @click="changeQuantity(item)">
-                  {{ item.quantity }}张 <div class="point">{{ item.point }}点</div>
-                </div>
+                <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 1 }" @click="settingParams.quantity = 1">1 张</div>
+                <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 4 }" @click="settingParams.quantity = 4">4 张</div>
+                <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 6 }" @click="settingParams.quantity = 6">6 张</div>
               </div>
             </div>
           </div>
           <div class="divider-top"></div>
           <div class="setting-params">
-            <div class="params-item">
+            <div class="params-item" style="width: 620px">
               <div class="setting-title">反向描述</div>
-              <div class="form-textarea">
-                <textarea rows="10"></textarea>
-                <img class="icon" :src="randomIcon" alt="" />
+              <div class="form-textarea" style="width: 86%">
+                <textarea rows="10" v-model="settingParams.reverseDescription"></textarea>
               </div>
             </div>
-            <div class="params-item">
+            <div class="params-item" style="width: 200px">
               <div class="setting-title">参考图</div>
-              <div class="params-image" v-show="false">
-                <div class="params-image-upload">
+              <div class="params-image">
+                <div class="params-image-upload" v-show="!settingParams.referenceImage">
                   <img :src="plusIcon" alt="" />
                   <div>上传图片</div>
+                  <input type="file" @change="changeReferenceImage($event)" />
                 </div>
-                <div class="params-image-view">
-                  <img class="view" src="" alt="" />
-                  <div class="del-btn">
+                <div class="params-image-view" v-show="settingParams.referenceImage">
+                  <img class="view" :src="settingParams.referenceImage" alt="" />
+                  <div class="del-btn" @click="settingParams.referenceImage = ''">
                     <img class="del-icon" :src="deleteIcon" alt="" />
                   </div>
                 </div>
               </div>
             </div>
-            <div class="params-item">
+            <div class="params-item" style="width: 240px">
               <div class="setting-title">种子数量</div>
               <div class="form-input-icon">
-                <input class="form-input" v-model="settingParams.seed" />
-                <img src="" alt="" />
+                <input class="form-input" v-model="settingParams.seed" maxlength="12" @input="settingParams.seed = settingParams.seed.replace(/\D/g, '').replace(/^0{1,}/g, '')" />
+                <div class="icon-bg" @click="settingParams.seed = new Date().getTime()"><img class="icon" :src="randomIcon" alt="" /></div>
               </div>
             </div>
             <div class="params-item">
               <div class="setting-title">提示重量</div>
-              <div><Slider class="slider" :min="0" :max="100" /><div class="slider-view">0%</div></div>
+              <div class="slider-wrap">
+                <Slider v-model:value="settingParams.tipWeight" class="slider" :min="1" :max="100" />
+                <div class="slider-view">{{ settingParams.tipWeight }}%</div>
+              </div>
             </div>
           </div>
         </div>
@@ -90,48 +93,79 @@
           <button :class="{ active: tab == 'collection' }" @click="changeTab('collection')"><img v-show="tab == 'collection'" :src="collectionIcon_black" /><img v-show="tab == 'collect'" :src="collectionIcon_white" />集合</button>
           <button style="margin-left: 16px" :class="{ active: tab == 'collect' }" @click="changeTab('collect')"><img v-show="tab == 'collection'" :src="starIcon_white" /><img v-show="tab == 'collect'" :src="starIcon_black" />收藏</button>
         </div>
-        <div class="search"><input placeholder="请输入搜索关键词" /><img class="icon" :src="searchIcon" /></div>
+        <div class="search">
+          <input v-show="tab == 'collection'" v-model="collectionSearchValue" placeholder="请输入搜索关键词" />
+          <input v-show="tab == 'collect'" v-model="collectSearchValue" placeholder="请输入搜索关键词" />
+          <img class="icon" :src="searchIcon" />
+        </div>
       </div>
       <div class="images">
         <div v-show="tab == 'collection'" class="collection">
-          <div v-for="group in collection" :key="group" class="group">
-            <div class="group-item">
-              <div v-for="image in group.images" :key="image" class="group-item-content">
-                <img class="group-item-image" :src="image.url" alt="" />
-                <div class="hover">
-                  <div>
-                    <span class="icon-wrap"><img :src="deleteIcon" /></span>
-                  </div>
-                  <div>
-                    <span class="icon-wrap"><img v-show="image.collected" :src="starIcon_active" /><img v-show="!image.collected" :src="starIcon_white" /></span><span class="icon-wrap" style="margin-left: 8px"><img :src="downloadIcon" /></span>
+          <div v-show="collection.length > 0">
+            <div v-for="group in collection" :key="group" class="group">
+              <div v-show="group.status == 0" class="queue">
+                <div v-show="group.status == 0" class="queueing">等待排队中...</div>
+                <div v-show="false" class="queueing">作画中</div>
+              </div>
+              <div v-show="group.status == 2">
+                <div class="group-item">
+                  <div v-for="image in group.images" :key="image" class="group-item-content">
+                    <img class="group-item-image" :src="image.image" alt="" />
+                    <div class="hover">
+                      <div>
+                        <span class="icon-wrap" @click="deleteImage(group.id, image.id)"><img :src="deleteIcon" /></span>
+                      </div>
+                      <div>
+                        <span class="icon-wrap" @click="doCollect(image)"><img v-show="image.collected" :src="starIcon_active" /><img v-show="!image.collected" :src="starIcon_white" /></span>
+                        <span class="icon-wrap" style="margin-left: 8px" @click="downloadImage(image.image)"><img :src="downloadIcon" /></span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div class="group-keyword">
+                <span class="group-keyword-label">画面描述：</span><span class="group-keyword-text">{{ group.keyword }}</span>
+              </div>
             </div>
-            <div class="group-keyword">
-              <span class="group-keyword-label">画面描述：</span><span class="group-keyword-text">{{ group.keyword }}</span>
-            </div>
+            <Pagination v-model:current="collectionPage.pageNum" :total="collectionPage.total" show-less-items @change="collectionPageChange" style="margin-top: 20px" />
+          </div>
+          <div v-show="collection.length == 0" class="noData">
+            <img :src="noDataImage" alt="" />
+            <div>啊欧，还没有画作，快去生成画作吧！</div>
           </div>
         </div>
         <div v-show="tab == 'collect'" class="collect">
-          <div v-masonry fit-width="false" transition-duration="0.3s" item-selector=".collect-item" origin-left="false">
-            <div v-masonry-tile v-for="image in collect" :key="image.id" class="collect-item">
-              <img class="collect-item-image" :src="image.url" alt="" />
-              <div class="hover">
-                <div>
-                  <span class="icon-wrap"><img :src="subtractIcon" /></span><span class="icon-wrap" style="margin-left: 8px"><img :src="downloadIcon" /></span>
+          <div v-show="collect.length > 0">
+            <div v-masonry fit-width="false" transition-duration="0.3s" item-selector=".collect-item" origin-left="true">
+              <div v-masonry-tile v-for="image in collect" :key="image.id" class="collect-item">
+                <img class="collect-item-image" :src="image.image" alt="" />
+                <div class="hover">
+                  <div>
+                    <span class="icon-wrap" @click="doCollect(image)"><img :src="subtractIcon" /></span><span class="icon-wrap" style="margin-left: 8px" @click="downloadImage(image.image)"><img :src="downloadIcon" /></span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+          <div v-show="collect.length == 0" class="noData">
+            <img :src="noDataImage" alt="" />
+            <div>啊欧，还没有画作，快去集合点击收藏吧！</div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <div ref="globalModal">
+    <Modal v-model:visible="imageDetailsVisible" :maskClosable="false" :getContainer="() => $refs.globalModal" class="jy-modal">
+      <img src="" alt="" />
+    </Modal>
+  </div>
 </template>
 <script lang="ts">
-  import { defineComponent, reactive, ref, getCurrentInstance, nextTick } from 'vue';
-  import { Slider } from 'ant-design-vue';
+  import { defineComponent, reactive, ref, getCurrentInstance, nextTick, onBeforeMount, watch } from 'vue';
+  import { message, Slider, Pagination, Modal } from 'ant-design-vue';
+  import { getUploadSingnatureApi, aiPaintingStyleApi, aiPaintingCollectionApi, aiPaintingDeleteApi, aiPaintingMyCollectApi, aiPaintingCollectApi, aiPaintingSubmitApi, aiPaintingDetailsApi, aiPaintingQueueApi } from '/@/api/api';
+  import axios from 'axios';
   import settingIcon from '/@/assets/icons/setting.svg';
   import arrowIcon from '/@/assets/icons/arrow-down.svg';
   import collectionIcon_black from '/@/assets/icons/collection_black.png';
@@ -143,105 +177,42 @@
   import downloadIcon from '/@/assets/icons/download.png';
   import subtractIcon from '/@/assets/icons/subtract.png';
   import searchIcon from '/@/assets/icons/search.svg';
-  import erciyuan from '/@/assets/images/aiPainting-style-riman-erciyuan.png';
-  import xinhaicheng from '/@/assets/images/aiPainting-style-riman-xinhaicheng.png';
-  import rimanjingdian from '/@/assets/images/aiPainting-style-riman-rimanjingdian.png';
-  import gongqijun from '/@/assets/images/aiPainting-style-riman-gongqijun.png';
-  import chaoxianshi from '/@/assets/images/aiPainting-style-xiaoxiang-chaoxianshi.png';
-  import pikesi from '/@/assets/images/aiPainting-style-xiaoxiang-pikesi.png';
-  import fengkuangdongwucheng from '/@/assets/images/aiPainting-style-xiaoxiang-fengkuangdongwucheng.png';
-  import renwu from '/@/assets/images/aiPainting-style-xiaoxiang-renwu.png';
-  import sanDdongwu from '/@/assets/images/aiPainting-style-xiaoxiang-3Ddongwu.png';
-  import saibopengke from '/@/assets/images/aiPainting-style-xiaoxiang-saibopengke.png';
-  import shenhuajuese from '/@/assets/images/aiPainting-style-yishu-shenhuajuese.png';
-  import saibopengkedongman from '/@/assets/images/aiPainting-style-yishu-saibopengkedongman.png';
-  import kongjianquanxiyishu from '/@/assets/images/aiPainting-style-yishu-kongjianquanxiyishu.png';
-  import xiangsuyishu from '/@/assets/images/aiPainting-style-yishu-xiangsuyishu.png';
-  import fuzhuang from '/@/assets/images/aiPainting-style-shijing-fuzhuang.png';
-  import xiezi from '/@/assets/images/aiPainting-style-shijing-xiezi.png';
-  import bao from '/@/assets/images/aiPainting-style-shijing-bao.png';
-  import jianzhu from '/@/assets/images/aiPainting-style-shijing-jianzhu.png';
-  import manhuafeng from '/@/assets/images/aiPainting-style-chatu-manhuafeng.png';
-  import tiezhihua from '/@/assets/images/aiPainting-style-chatu-tiezhihua.png';
-  import shiliangtubiao from '/@/assets/images/aiPainting-style-chatu-shiliangtubiao.png';
-  import kalacimoxing from '/@/assets/images/aiPainting-style-chatu-kalacimoxing.png';
-  import wenshen from '/@/assets/images/aiPainting-style-chatu-wenshen.png';
-  import xiangsufengjing from '/@/assets/images/aiPainting-style-sheji-xiangsufengjing.png';
-  import dijuxuanran from '/@/assets/images/aiPainting-style-sheji-dijuxuanran.png';
-  import IPjuese from '/@/assets/images/aiPainting-style-sheji-IPjuese.png';
   import randomIcon from '/@/assets/icons/random.png';
   import plusIcon from '/@/assets/icons/plus.png';
+  import randomGreenIcon from '/@/assets/icons/random-green.svg';
+  import noDataImage from '/@/assets/images/noData.png';
 
   export default defineComponent({
     name: 'Painting',
-    components: { Slider },
+    components: { Slider, Pagination, Modal },
     setup() {
       const instance = getCurrentInstance();
       const _this = instance?.appContext.config.globalProperties;
 
       const settingParams = reactive<any>({
+        style: { id: undefined },
         keyword: '',
         referenceImage: '',
+        tipWeight: 50,
+        reverseDescription: '',
+        seed: new Date().getTime(),
+        quantity: 1,
       });
 
+      const collectionPage = reactive({
+        pageNum: 1,
+        pageSize: 10,
+        total: 0,
+      });
+
+      const collectionSearchValue = ref('');
+      const collectSearchValue = ref('');
+
+      const settingShow = ref(false);
+
       const tab = ref('collection');
-      const collection = ref<any>([
-        {
-          images: [
-            { id: 1, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E4%BD%8E.png', collected: false },
-            { id: 2, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E4%BD%8E.png', collected: true },
-            { id: 3, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E4%BD%8E.png', collected: false },
-            { id: 4, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E4%BD%8E.png', collected: false },
-            { id: 5, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E4%BD%8E.png', collected: false },
-            { id: 6, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E4%BD%8E.png', collected: false },
-          ],
-          keyword: 'test',
-        },
-        {
-          images: [
-            { id: 1, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E9%AB%98.png', collected: false },
-            { id: 2, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E9%AB%98.png', collected: false },
-            { id: 3, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E9%AB%98.png', collected: true },
-            { id: 4, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E9%AB%98.png', collected: false },
-            { id: 5, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E9%AB%98.png', collected: false },
-            { id: 6, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E9%AB%98.png', collected: false },
-          ],
-          keyword: 'test',
-        },
-        {
-          images: [
-            { id: 1, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/1024.png', collected: true },
-            { id: 2, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/1024.png', collected: false },
-            { id: 3, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/1024.png', collected: false },
-            { id: 4, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/1024.png', collected: false },
-            { id: 5, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/1024.png', collected: false },
-            { id: 6, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/1024.png', collected: false },
-          ],
-          keyword: 'test',
-        },
-      ]);
-      const collect = ref<any>([
-        { id: 1, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/1024.png', keyword: 'test' },
-        { id: 2, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E4%BD%8E.png', keyword: 'test' },
-        { id: 3, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E9%AB%98.png', keyword: 'test' },
-        { id: 4, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/2048.png', keyword: 'test' },
-        { id: 5, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/3_4%20%E4%BD%8E.png', keyword: 'test' },
-        { id: 6, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/3_4%E9%AB%98.png', keyword: 'test' },
-        { id: 7, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/4_3%20%E4%BD%8E.png', keyword: 'test' },
-        { id: 8, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/4_3%20%E9%AB%98.png', keyword: 'test' },
-        { id: 9, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E4%BD%8E.png', keyword: 'test' },
-        { id: 10, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E9%AB%98.png', keyword: 'test' },
-        { id: 11, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/1024.png', keyword: 'test' },
-        { id: 12, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E4%BD%8E.png', keyword: 'test' },
-        { id: 13, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/16_9%20%E9%AB%98.png', keyword: 'test' },
-        { id: 14, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/2048.png', keyword: 'test' },
-        { id: 15, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/3_4%20%E4%BD%8E.png', keyword: 'test' },
-        { id: 16, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/3_4%E9%AB%98.png', keyword: 'test' },
-        { id: 17, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/4_3%20%E4%BD%8E.png', keyword: 'test' },
-        { id: 18, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/4_3%20%E9%AB%98.png', keyword: 'test' },
-        { id: 19, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E4%BD%8E.png', keyword: 'test' },
-        { id: 20, url: 'https://jyzn-test.oss-cn-shanghai.aliyuncs.com/test/9_16%20%E9%AB%98.png', keyword: 'test' },
-      ]);
+      const collection = ref<any>([]);
+      const collect = ref<any>([]);
 
       const changeTab = (t) => {
         tab.value = t;
@@ -252,45 +223,41 @@
         }
       };
 
-      const style = reactive<any>([
-        // eslint-disable-next-line prettier/prettier
-        { id: 0, text: '日漫', active: true, list: [{ id: 0, img: erciyuan, label: '二次元', active: true }, { id: 1, img: xinhaicheng, label: '新海诚' }, { id: 2, img: rimanjingdian, label: '日漫经典' }, { id: 3, img: gongqijun, label: '宫崎骏' }] },
-        // eslint-disable-next-line prettier/prettier
-        { id: 2, text: '肖像', list: [{ id: 0, img: chaoxianshi, label: '超现实' }, { id: 1, img: pikesi, label: '皮克斯' }, { id: 2, img: fengkuangdongwucheng, label: '疯狂动物城' }, { id: 3, img: renwu, label: '人物' }, { id: 3, img: sanDdongwu, label: '3D动物' }, { id: 3, img: saibopengke, label: '赛博朋克' }] },
-        // eslint-disable-next-line prettier/prettier
-        { id: 3, text: '艺术', list: [{ id: 0, img: shenhuajuese, label: '神话角色' }, { id: 1, img: saibopengkedongman, label: '赛博朋克动漫' }, { id: 2, img: kongjianquanxiyishu, label: '空间全息艺术' }, { id: 3, img: xiangsuyishu, label: '像素艺术' }] },
-        // eslint-disable-next-line prettier/prettier
-        { id: 4, text: '实景', list: [{ id: 0, img: fuzhuang, label: '服装' }, { id: 1, img: xiezi, label: '鞋子' }, { id: 2, img: bao, label: '包' }, { id: 3, img: jianzhu, label: '建筑' }] },
-        // eslint-disable-next-line prettier/prettier
-        { id: 5, text: '插图', list: [{ id: 0, img: manhuafeng, label: '漫画风' }, { id: 1, img: tiezhihua, label: '贴纸画' }, { id: 2, img: shiliangtubiao, label: '矢量图标' }, { id: 3, img: kalacimoxing, label: '卡拉此模型' }, { id: 3, img: wenshen, label: '纹身' }] },
-        // eslint-disable-next-line prettier/prettier
-        { id: 6, text: '设计', list: [{ id: 0, img: xiangsufengjing, label: '像素风景' }, { id: 0, img: dijuxuanran, label: '低聚渲染' }, { id: 0, img: IPjuese, label: 'IP角色' }] },
-      ]);
+      const style = ref<any>([]);
+      const getPaintingStyle = () => {
+        aiPaintingStyleApi().then((res) => {
+          if (res.code == 200) {
+            res.data[0].active = true;
+            res.data[0].children[0].active = true;
+            style.value = res.data;
+          }
+        });
+      };
 
       const changeStyleTab = (item) => {
-        const activeTab = style.find((item1) => item1.active);
+        const activeTab = style.value.find((item1) => item1.active);
         activeTab.active = false;
-        activeTab.list.find((item2) => item2.active).active = false;
+        activeTab.children.find((item2) => item2.active).active = false;
         item.active = true;
-        item.list[0].active = true;
+        item.children[0].active = true;
       };
 
       const changeStyleItem = (item) => {
-        style.find((item1) => item1.active).list.find((item2) => item2.active).active = false;
+        style.value.find((item1) => item1.active).children.find((item2) => item2.active).active = false;
         item.active = true;
       };
 
       const proportion = reactive<any>([
         // eslint-disable-next-line prettier/prettier
-        { id: 0, text: '1:1', active: true, list: [{ id: 0, resolution: '1024*1024', point: 0, active: true }, { id: 1, resolution: '2048*2048', point: 2 }] },
+        { id: 0, text: '1:1', active: true, list: [{ id: 0, resolution: '512*512', point: 1, active: true }, { id: 1, resolution: '2048*2048', point: 2 }] },
         // eslint-disable-next-line prettier/prettier
-        { id: 0, text: '3:4', list: [{ id: 0, resolution: '900*1200', point: 0 }, { id: 1, resolution: '1800*2400', point: 2 }] },
+        { id: 0, text: '3:4', list: [{ id: 0, resolution: '900*1200', point: 1 }, { id: 1, resolution: '1800*2400', point: 2 }] },
         // eslint-disable-next-line prettier/prettier
-        { id: 0, text: '4:3', list: [{ id: 0, resolution: '1200*900', point: 0 }, { id: 1, resolution: '2400*1800', point: 2 }] },
+        { id: 0, text: '4:3', list: [{ id: 0, resolution: '1200*900', point: 1 }, { id: 1, resolution: '2400*1800', point: 2 }] },
         // eslint-disable-next-line prettier/prettier
-        { id: 0, text: '9:16', list: [{ id: 0, resolution: '720*1280', point: 0 }, { id: 1, resolution: '1152*2048', point: 2 }] },
+        { id: 0, text: '9:16', list: [{ id: 0, resolution: '720*1280', point: 1 }, { id: 1, resolution: '1152*2048', point: 2 }] },
         // eslint-disable-next-line prettier/prettier
-        { id: 0, text: '16:9', list: [{ id: 0, resolution: '1280*720', point: 0 }, { id: 1, resolution: '2048*1152', point: 2 }] },
+        { id: 0, text: '16:9', list: [{ id: 0, resolution: '1280*720', point: 1 }, { id: 1, resolution: '2048*1152', point: 2 }] },
       ]);
 
       const changeProportion = (item0) => {
@@ -312,10 +279,135 @@
         { quantity: 6, point: 3 },
       ]);
 
-      const changeQuantity = (item0) => {
-        quantity.find((item1) => item1.active).active = false;
-        item0.active = true;
+      const changeReferenceImage = (e) => {
+        getUploadSingnatureApi('AiPainting').then((res) => {
+          const params = new FormData();
+          params.append('key', res.data.key);
+          params.append('policy', res.data.policy);
+          params.append('OSSAccessKeyId', res.data.OSSAccessKeyId);
+          params.append('success_action_status', '200');
+          params.append('signature', res.data.signature);
+          params.append('file', e.target.files[0]);
+          axios({
+            url: res.data.host,
+            method: 'post',
+            data: params,
+            headers: { 'Content-Type': 'multipart/form-data;charset=UTF-8' },
+          }).then(() => {
+            settingParams.referenceImage = res.data.url;
+          });
+        });
       };
+
+      const sampler = ['k_lms', 'k_heun', 'k_euler', 'k_euler_a', 'k_dpm_2', 'k_dpm_2_a', 'k_dpm_fast', 'k_dpm_adaptive', 'k_dpmpp_2m', 'k_dpmpp_2s_a'];
+
+      const getCollection = () => {
+        aiPaintingCollectionApi({ searchValue: collectionSearchValue.value, pageSize: collectionPage.pageSize, pageNum: collectionPage.pageNum }).then((res) => {
+          if (res.code == 200) {
+            collection.value = res.data.rows;
+            collectionPage.total = res.data.total;
+
+            clearInterval(queueTask);
+
+            const unfinishList = res.data.rows.filter((item) => item.status == 0);
+
+            if (unfinishList.length > 0) {
+              const unfinish = unfinishList[unfinishList.length - 1];
+              queueTask = setInterval(() => {
+                aiPaintingDetailsApi(unfinish.id).then((res1) => {
+                  if (res1.code == 200 && res1.data.status == 2) {
+                    getCollection();
+                  }
+                });
+              }, 3000);
+            }
+          }
+        });
+      };
+
+      const deleteImage = (paintingId, imageId) => {
+        aiPaintingDeleteApi(paintingId, imageId).then((res) => {
+          if (res.code == 200) {
+            message.success('删除成功');
+            getCollection();
+          }
+        });
+      };
+
+      const getMyCollect = () => {
+        aiPaintingMyCollectApi({ searchValue: collectSearchValue.value }).then((res) => {
+          if (res.code == 200) {
+            collect.value = res.data.rows;
+            nextTick(() => {
+              _this?.$redrawVueMasonry();
+            });
+          }
+        });
+      };
+
+      const doCollect = (image) => {
+        aiPaintingCollectApi(image.id, !image.collected).then((res) => {
+          if (res.code == 200) {
+            message.success((image.collected ? '取消' : '') + '收藏成功');
+            // getCollection();
+            if (image.aiPainting.quantity == 0) {
+              image.collected = true;
+            } else {
+              getCollection();
+            }
+            getMyCollect();
+          }
+        });
+      };
+
+      const downloadImage = (url) => {
+        window.open(url);
+      };
+
+      const submiting = ref(false);
+
+      const submit = () => {
+        if (submiting.value) {
+          return false;
+        }
+
+        settingShow.value = false;
+
+        settingParams.style.id = style.value.find((item) => item.active).children.find((item) => item.active).id;
+        settingParams.proportion = proportion.find((item) => item.active).text;
+        settingParams.resolution = proportion.find((item) => item.active).list.find((item) => item.active).resolution;
+
+        submiting.value = true;
+        aiPaintingSubmitApi(settingParams).then((res) => {
+          if (res.code == 200) {
+            message.success('提交成功，正在作画，请稍后');
+            getCollection();
+          }
+          submiting.value = false;
+        });
+      };
+
+      let queueTask: any = 0;
+
+      const collectionPageChange = (page, pageSize) => {
+        collectionPage.pageSize = pageSize;
+        getCollection();
+      };
+
+      const imageDetailsVisible = ref(false);
+
+      watch(collectSearchValue, () => {
+        getMyCollect();
+      });
+      watch(collectionSearchValue, () => {
+        getCollection();
+      });
+
+      onBeforeMount(() => {
+        getPaintingStyle();
+        getCollection();
+        getMyCollect();
+      });
 
       return {
         settingParams,
@@ -340,36 +432,27 @@
         changeStyleItem,
         proportion,
         quantity,
-        erciyuan,
-        xinhaicheng,
-        rimanjingdian,
-        gongqijun,
-        chaoxianshi,
-        pikesi,
-        fengkuangdongwucheng,
-        renwu,
-        sanDdongwu,
-        saibopengke,
-        shenhuajuese,
-        saibopengkedongman,
-        kongjianquanxiyishu,
-        xiangsuyishu,
-        fuzhuang,
-        xiezi,
-        bao,
-        jianzhu,
-        manhuafeng,
-        tiezhihua,
-        shiliangtubiao,
-        kalacimoxing,
-        wenshen,
-        xiangsufengjing,
-        dijuxuanran,
-        IPjuese,
         changeProportion,
         changeResolution,
-        changeQuantity,
         plusIcon,
+        changeReferenceImage,
+        settingShow,
+        randomGreenIcon,
+        sampler,
+        getPaintingStyle,
+        aiPaintingCollectionApi,
+        deleteImage,
+        getMyCollect,
+        doCollect,
+        downloadImage,
+        noDataImage,
+        collectionSearchValue,
+        collectSearchValue,
+        getCollection,
+        submit,
+        collectionPage,
+        collectionPageChange,
+        imageDetailsVisible,
       };
     },
   });
@@ -395,6 +478,7 @@
         height: 48px;
         border-radius: 4px;
         position: relative;
+        cursor: pointer;
 
         .setting-text {
           margin: 0px 12px;
@@ -406,6 +490,11 @@
           height: 24px;
         }
       }
+
+      .setting.active {
+        border: 1px solid #8aff00;
+      }
+
       .keyword {
         flex: 1;
         background-color: black;
@@ -430,6 +519,7 @@
           top: 50%;
           right: 10px;
           transform: translateY(-50%);
+          cursor: pointer;
         }
       }
       .submit {
@@ -512,7 +602,7 @@
             width: 96px;
             height: 96px;
             position: relative;
-            border-radius: 8px;
+            border-radius: 4px;
             overflow: hidden;
             cursor: pointer;
 
@@ -641,6 +731,7 @@
               font-size: 14px;
               resize: none;
               height: 100%;
+              width: 100%;
             }
 
             .icon {
@@ -661,19 +752,152 @@
             border-radius: 8px;
             overflow: hidden;
             position: relative;
+            background: rgba(255, 255, 255, 0.16);
 
             .params-image-upload {
               position: absolute;
-              width: 100%;
-              height: 100%;
-              top: 0px;
-              left: 0px;
-              background: rgba(255, 255, 255, 0.16);
               text-align: center;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              color: white;
+              cursor: pointer;
 
               img {
                 display: inline-block;
               }
+
+              input[type='file'] {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0px;
+                left: 0px;
+                cursor: pointer;
+                font-size: 0px;
+                opacity: 0;
+              }
+            }
+
+            .params-image-view {
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              left: 0px;
+              top: 0px;
+
+              .view {
+                width: 100%;
+                height: 100%;
+              }
+
+              .del-btn {
+                width: 32px;
+                height: 32px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                line-height: 32px;
+                text-align: center;
+                background: rgba(0, 0, 0, 0.6);
+                border-radius: 2px;
+                display: none;
+                cursor: pointer;
+
+                .del-icon {
+                  display: inline-block;
+                }
+              }
+            }
+
+            .params-image-view:hover .del-btn {
+              display: block;
+            }
+          }
+
+          .form-input-icon {
+            width: 166px;
+            height: 36px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+
+            input {
+              width: 100%;
+              height: 100%;
+              color: rgba(255, 255, 255, 0.9);
+              background: rgba(255, 255, 255, 0.16);
+              padding: 0px 24px;
+            }
+
+            input:focus-visible {
+              outline: none;
+            }
+
+            .icon-bg {
+              position: absolute;
+              width: 36px;
+              height: 36px;
+              top: 0px;
+              right: 0px;
+              background: rgba(255, 255, 255, 0.16);
+              border-radius: 4px;
+              cursor: pointer;
+            }
+
+            img {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+            }
+          }
+
+          .slider-wrap {
+            display: flex;
+            width: 300px;
+            align-items: center;
+
+            .slider {
+              flex: 1;
+              margin-right: 12px;
+            }
+
+            :deep(.slider) {
+              .ant-slider-handle {
+                background: url('/@/assets/icons/slider-handle.png') !important;
+                overflow: visible;
+                margin-top: -8px;
+                width: 22px;
+                height: 22px;
+                background-color: none !important;
+                z-index: 2;
+              }
+
+              .ant-slider-track {
+                background-color: #8aff00 !important;
+                z-index: 1;
+              }
+
+              .ant-slider-rail {
+                background-color: black;
+              }
+
+              .ant-slider-step {
+                background: rgba(255, 255, 255, 0.16) !important;
+              }
+            }
+
+            .slider-view {
+              width: 64px;
+              height: 32px;
+              line-height: 32px;
+              text-align: center;
+              color: white;
+              font-weight: 600;
+              background: rgba(255, 255, 255, 0.16);
+              border-radius: 4px;
             }
           }
         }
@@ -740,12 +964,28 @@
         transform: translateY(-24px);
         .group {
           margin-top: 24px;
+
+          .queue {
+            width: 212px;
+            height: 378px;
+            background: rgba(255, 255, 255, 0.16);
+            border-radius: 4px;
+            position: relative;
+            color: rgba(255, 255, 255, 0.9);
+
+            .queueing {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+            }
+          }
           .group-item {
             display: flex;
             flex-wrap: wrap;
             gap: 24px;
             .group-item-content {
-              border-radius: 8px;
+              border-radius: 4px;
               overflow: hidden;
               position: relative;
 
@@ -836,6 +1076,18 @@
           display: flex;
         }
       }
+    }
+  }
+
+  .noData {
+    padding: 100px 0px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    height: 360px;
+
+    img {
+      display: inline-block;
     }
   }
 </style>

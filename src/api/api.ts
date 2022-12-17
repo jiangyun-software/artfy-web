@@ -304,3 +304,63 @@ export function cutoutApi(data) {
     data: data,
   });
 }
+
+// ai作画风格列表
+export function aiPaintingStyleApi() {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPaintingStyle',
+  });
+}
+
+// ai作画集合
+export function aiPaintingCollectionApi(params) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPainting',
+    params: params,
+  });
+}
+
+// ai作画删除
+export function aiPaintingDeleteApi(paintingId, imageId) {
+  return defHttp.delete<RestResult>({
+    url: '/artfy/aiPainting/' + paintingId + '/' + imageId,
+  });
+}
+
+// ai作画 我的收藏
+export function aiPaintingMyCollectApi(params) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPainting/collect',
+    params: params,
+  });
+}
+
+// ai作画 搜藏、取消收藏
+export function aiPaintingCollectApi(id, collected) {
+  return defHttp.put<RestResult>({
+    url: '/artfy/aiPainting/collect',
+    data: { id, collected },
+  });
+}
+
+// ai作画 提交
+export function aiPaintingSubmitApi(params) {
+  return defHttp.post<RestResult>({
+    url: '/artfy/aiPainting',
+    data: params,
+  });
+}
+
+// ai作画 详情
+export function aiPaintingDetailsApi(id) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPainting/' + id,
+  });
+}
+
+// ai作画 队列数量
+export function aiPaintingQueueApi(id) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPainting/queue/' + id,
+  });
+}
