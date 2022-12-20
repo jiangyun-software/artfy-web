@@ -210,7 +210,7 @@
 
       .menu-text {
         line-height: 100px;
-        opacity: 0.6;
+        color: rgba(0, 0, 0, 0.6);
 
         .caret {
           font-size: 14px;

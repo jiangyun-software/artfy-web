@@ -5,7 +5,10 @@
         <div style="display: flex">
           <div class="setting" :class="{ active: settingShow }" @click="settingShow = !settingShow"><img class="settingIcon" :src="settingIcon" alt="" /><span class="setting-text">参数设置</span><img class="arrowIcon" :src="arrowIcon" /></div>
           <div class="keyword"><input v-model="settingParams.keyword" placeholder="请输入你想要的图片描述" /><img class="icon" :src="randomGreenIcon" /></div>
-          <button class="submit" @click="submit">立即生成<span class="point">2点</span></button>
+          <button class="submit" @click="submit">
+            立即生成
+            <span class="point">{{ settingParams.totalPoint }}点</span>
+          </button>
         </div>
         <div class="setting-content" v-show="settingShow">
           <div class="setting-title">
@@ -68,12 +71,16 @@
                   </div>
                 </div>
               </div>
+              <div class="guidanceScale">
+                <div class="guidanceScale-title">参考图相似度</div>
+                <Slider v-model:value="settingParams.guidanceScale" class="slider" :min="0.01" :max="1" :step="0.01" />
+              </div>
             </div>
             <div class="params-item" style="width: 240px">
-              <div class="setting-title">种子数量</div>
+              <div class="setting-title">种子</div>
               <div class="form-input-icon">
-                <input class="form-input" v-model="settingParams.seed" maxlength="12" @input="settingParams.seed = settingParams.seed.replace(/\D/g, '').replace(/^0{1,}/g, '')" />
-                <div class="icon-bg" @click="settingParams.seed = new Date().getTime()"><img class="icon" :src="randomIcon" alt="" /></div>
+                <input class="form-input" v-model="settingParams.seed" maxlength="9" @input="settingParams.seed = settingParams.seed.replace(/\D/g, '').replace(/^0{1,}/g, '')" />
+                <div class="icon-bg" @click="randomSeed()"><img class="icon" :src="randomIcon" alt="" /></div>
               </div>
             </div>
             <div class="params-item">
@@ -104,13 +111,16 @@
           <div v-show="collection.length > 0">
             <div v-for="group in collection" :key="group" class="group">
               <div v-show="group.status == 0" class="queue">
-                <div v-show="group.status == 0" class="queueing">等待排队中...</div>
-                <div v-show="false" class="queueing">作画中</div>
+                <div v-show="group.status == 0" class="queueing">
+                  <div class="queueing-text">等待排队中({{ group.queue }}人)...</div>
+                  <div class="queueing-time">预计等待{{ Math.floor(group.queue * 0.2) }}分钟</div>
+                </div>
+                <div v-show="false" class="painting">作画中</div>
               </div>
               <div v-show="group.status == 2">
                 <div class="group-item">
                   <div v-for="image in group.images" :key="image" class="group-item-content">
-                    <img class="group-item-image" :src="image.image" alt="" />
+                    <img class="group-item-image" :src="image.image" alt="" @click="viewImage(group, image)" />
                     <div class="hover">
                       <div>
                         <span class="icon-wrap" @click="deleteImage(group.id, image.id)"><img :src="deleteIcon" /></span>
@@ -138,7 +148,7 @@
           <div v-show="collect.length > 0">
             <div v-masonry fit-width="false" transition-duration="0.3s" item-selector=".collect-item" origin-left="true">
               <div v-masonry-tile v-for="image in collect" :key="image.id" class="collect-item">
-                <img class="collect-item-image" :src="image.image" alt="" />
+                <img class="collect-item-image" :src="image.image" alt="" @click="viewImage(undefined, image)" />
                 <div class="hover">
                   <div>
                     <span class="icon-wrap" @click="doCollect(image)"><img :src="subtractIcon" /></span><span class="icon-wrap" style="margin-left: 8px" @click="downloadImage(image.image)"><img :src="downloadIcon" /></span>
@@ -156,13 +166,32 @@
     </div>
   </div>
   <div ref="globalModal">
-    <Modal v-model:visible="imageDetailsVisible" :maskClosable="false" :getContainer="() => $refs.globalModal" class="jy-modal">
-      <img src="" alt="" />
+    <Modal v-model:visible="imageDetailsVisible" :maskClosable="false" width="100%" wrap-class-name="full-modal" :getContainer="() => $refs.globalModal" class="jy-modal" :footer="null">
+      <div class="img-details">
+        <div class="img-details-wrap">
+          <img :src="imageInfo.image" alt="" />
+        </div>
+        <div class="img-details-info">
+          <div class="img-details-info-label" style="margin-top: 0px">画面描述</div>
+          <div class="img-details-info-value">{{ imageInfo.aiPainting.keyword }}</div>
+          <div class="img-details-info-label">反向描述</div>
+          <div class="img-details-info-value">{{ imageInfo.aiPainting.reverseDescription }}</div>
+          <div class="img-details-info-label">风格选择</div>
+          <div class="img-details-info-value">{{ imageInfo.aiPainting.style.parent.label + '-' + imageInfo.aiPainting.style.label }}</div>
+          <div class="img-details-info-label">尺寸</div>
+          <div class="img-details-info-value">{{ imageInfo.aiPainting.resolution }}</div>
+          <div class="img-details-info-label">种子</div>
+          <div class="img-details-info-value">{{ imageInfo.aiPainting.seed }}</div>
+          <div class="img-details-info-label">画面描述</div>
+          <div class="img-details-info-value">{{ imageInfo.aiPainting.tipWeight }}</div>
+          <div class="img-details-info-download"><button @click="downloadImage(imageInfo.image)">下载</button></div>
+        </div>
+      </div>
     </Modal>
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, reactive, ref, getCurrentInstance, nextTick, onBeforeMount, watch } from 'vue';
+  import { defineComponent, reactive, ref, getCurrentInstance, nextTick, onBeforeMount, watch, computed } from 'vue';
   import { message, Slider, Pagination, Modal } from 'ant-design-vue';
   import { getUploadSingnatureApi, aiPaintingStyleApi, aiPaintingCollectionApi, aiPaintingDeleteApi, aiPaintingMyCollectApi, aiPaintingCollectApi, aiPaintingSubmitApi, aiPaintingDetailsApi, aiPaintingQueueApi } from '/@/api/api';
   import axios from 'axios';
@@ -195,8 +224,10 @@
         referenceImage: '',
         tipWeight: 50,
         reverseDescription: '',
-        seed: new Date().getTime(),
+        seed: -1,
         quantity: 1,
+        totalPoint: 2,
+        guidanceScale: 0.5,
       });
 
       const collectionPage = reactive({
@@ -351,7 +382,7 @@
             message.success((image.collected ? '取消' : '') + '收藏成功');
             // getCollection();
             if (image.aiPainting.quantity == 0) {
-              image.collected = true;
+              image.collected = !image.collected;
             } else {
               getCollection();
             }
@@ -395,6 +426,26 @@
       };
 
       const imageDetailsVisible = ref(false);
+      const imageInfo = ref<any>({});
+
+      settingParams.totalPoint = computed(() => {
+        return proportion.find((item1) => item1.active).list.find((item2) => item2.active).point * settingParams.quantity;
+      });
+
+      const randomSeed = () => {
+        settingParams.seed = Math.ceil(Math.random() * 999999999);
+        console.log(settingParams.seed);
+      };
+
+      const viewImage = (group, image) => {
+        if (group) {
+          image.aiPainting = group;
+        }
+        imageInfo.value = image;
+        nextTick(() => {
+          imageDetailsVisible.value = true;
+        });
+      };
 
       watch(collectSearchValue, () => {
         getMyCollect();
@@ -453,6 +504,9 @@
         collectionPage,
         collectionPageChange,
         imageDetailsVisible,
+        randomSeed,
+        viewImage,
+        imageInfo,
       };
     },
   });
@@ -493,6 +547,10 @@
 
       .setting.active {
         border: 1px solid #8aff00;
+
+        .arrowIcon {
+          transform: rotate(180deg);
+        }
       }
 
       .keyword {
@@ -511,7 +569,7 @@
           color: rgba(255, 255, 255, 0.9);
           font-weight: 400;
           font-size: 14px;
-          padding: 0px 24px;
+          padding: 0px 50px 0px 24px;
         }
 
         .icon {
@@ -722,7 +780,7 @@
             border-radius: 4px;
             overflow: hidden;
             position: relative;
-            height: 120px;
+            height: 190px;
 
             textarea {
               background: rgba(255, 255, 255, 0.16);
@@ -813,6 +871,34 @@
 
             .params-image-view:hover .del-btn {
               display: block;
+            }
+          }
+
+          .guidanceScale {
+            margin-top: 24px;
+            width: 120px;
+
+            .guidanceScale-title {
+              color: rgba(255, 255, 255, 0.6);
+            }
+
+            :deep(.slider) {
+              .ant-slider-handle {
+                background-color: #8aff00 !important;
+              }
+
+              .ant-slider-track {
+                background-color: #8aff00 !important;
+                z-index: 1;
+              }
+
+              .ant-slider-rail {
+                background-color: black;
+              }
+
+              .ant-slider-step {
+                background: rgba(255, 255, 255, 0.16) !important;
+              }
             }
           }
 
@@ -977,7 +1063,17 @@
               position: absolute;
               top: 50%;
               left: 50%;
-              transform: translate(-50%, -50%);
+              transform: translateX(-50%);
+              width: 100%;
+              text-align: center;
+              height: 165px;
+
+              .queueing-time {
+                position: absolute;
+                bottom: 0px;
+                width: 100%;
+                color: #ffcd1a;
+              }
             }
           }
           .group-item {
@@ -988,6 +1084,7 @@
               border-radius: 4px;
               overflow: hidden;
               position: relative;
+              cursor: pointer;
 
               .group-item-image {
                 max-height: 378px;
@@ -1026,11 +1123,18 @@
             margin-top: 10px;
             height: 36px;
             border-bottom: 1px solid #4d4d4d;
+            display: flex;
+
             .group-keyword-label {
               color: rgba(255, 255, 255, 0.5);
+              width: 70px;
             }
             .group-keyword-text {
               color: rgba(255, 255, 255, 0.9);
+              flex: 1;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
             }
           }
         }
@@ -1088,6 +1192,85 @@
 
     img {
       display: inline-block;
+    }
+  }
+  :deep(.full-modal) {
+    .ant-modal {
+      max-width: 100%;
+      top: 0;
+      padding-bottom: 0;
+      margin: 0;
+    }
+    .ant-modal-content {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh);
+      background-color: black;
+    }
+    .ant-modal-body {
+      flex: 1;
+    }
+
+    .ant-modal-close {
+      color: white;
+    }
+  }
+
+  .img-details {
+    display: flex;
+    min-width: 1290;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    .img-details-wrap {
+      width: 600px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 4px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+
+    .img-details-info {
+      width: 540px;
+      margin-left: 90px;
+
+      .img-details-info-label {
+        font-weight: 500;
+        font-size: 16px;
+        color: white;
+        margin-top: 32px;
+      }
+
+      .img-details-info-value {
+        font-weight: 400;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 8px;
+      }
+
+      .img-details-info-download {
+        position: absolute;
+        left: 690px;
+        bottom: 0px;
+
+        button {
+          width: 168px;
+          background: #8aff00;
+          border-radius: 4px;
+          color: black;
+          height: 48px;
+          line-height: 48px;
+          font-size: 16px;
+        }
+      }
     }
   }
 </style>
