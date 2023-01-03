@@ -285,7 +285,7 @@
               a.href = url2;
               a.download = new Date().getTime() + '.png';
               a.click();
-              window.URL.revokeObjectURL(url); // 释放该 url
+              window.URL.revokeObjectURL(url2); // 释放该 url
             };
           }
         });

@@ -183,7 +183,7 @@ export const myRoutes: AppRouteModule[] = [
       },
       {
         path: 'aiPainting',
-        name: 'aiPainting',
+        name: 'AiPainting',
         component: () => import('/@/views/product/AIPainting/Index.vue'),
         meta: {
           title: t('jy.page.product.AIPainting.title'),
@@ -191,12 +191,41 @@ export const myRoutes: AppRouteModule[] = [
         children: [
           {
             path: 'painting',
-            name: 'painting',
+            name: 'Painting',
             component: () => import('/@/views/product/AIPainting/Painting.vue'),
             meta: {
               title: t('jy.page.product.AIPainting.painting.title'),
               footer: true,
             },
+          },
+          {
+            path: 'img2img',
+            name: 'Img2img',
+            component: () => import('/@/views/product/AIPainting/img2img/Img2img.vue'),
+            redirect: 'aiPainting/img2img/collection',
+            meta: {
+              title: t('jy.page.product.AIPainting.img2img.title'),
+            },
+            children: [
+              {
+                path: 'collection',
+                name: 'Collection',
+                component: () => import('/@/views/product/AIPainting/img2img/Collection.vue'),
+                meta: {
+                  title: t('jy.page.product.AIPainting.painting.title'),
+                  footer: true,
+                },
+              },
+              {
+                path: 'collect',
+                name: 'Collect',
+                component: () => import('/@/views/product/AIPainting/img2img/Collect.vue'),
+                meta: {
+                  title: t('jy.page.product.AIPainting.img2img.title'),
+                  footer: true,
+                },
+              },
+            ],
           },
         ],
       },

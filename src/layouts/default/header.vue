@@ -73,6 +73,7 @@
       </div>
       <router-link to="/apiDoc/cutout/universalCutoutApi" :append="false"><div class="menu-item menu-text">API</div></router-link>
       <router-link to="/price" :append="false"><div class="menu-item menu-text">价格</div></router-link>
+      <router-link to="/aiPainting/painting" :append="false"><div class="menu-item menu-text" :class="{ active: router.currentRoute.value.fullPath.startsWith('/aiPainting') }">AI艺术创作</div></router-link>
     </div>
     <div class="login">
       <div v-if="userInfo && userInfo.phonenumber" style="line-height: normal">
@@ -209,7 +210,7 @@
 
       .menu-text {
         line-height: 100px;
-        opacity: 0.6;
+        color: rgba(0, 0, 0, 0.6);
 
         .caret {
           font-size: 14px;
@@ -219,6 +220,10 @@
         .caret-up {
           display: none;
         }
+      }
+
+      .menu-text.active {
+        color: rgba(0, 53, 240, 1);
       }
     }
 

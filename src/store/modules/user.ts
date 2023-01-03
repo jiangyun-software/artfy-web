@@ -51,12 +51,13 @@ export const useUserStore = defineStore({
     /**
      * @description: login
      */
-    async login(params): Promise<GetUserInfoModel | null> {
+    async login(params) {
       try {
         const result = await loginApi(params);
         // save token
         this.setToken(result.data);
-        return this.afterLoginAction();
+        this.afterLoginAction();
+        location.reload();
       } catch (error) {
         return Promise.reject(error);
       }

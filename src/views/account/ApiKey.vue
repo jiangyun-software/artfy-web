@@ -32,7 +32,7 @@
     <Modal v-model:visible="subKeyModalVisible" :maskClosable="false" :title="subKeyModalTitle" :getContainer="() => $refs.globalModal" @cancel="onSubKeyModalClose" class="jy-modal" :width="604">
       <Form ref="subKeyFormRef" :model="subKeyFormData" :rules="subKeyRules" name="subKeyForm" autocomplete="off" :label-col="{ span: 4 }">
         <FormItem name="id" style="display: none">
-          <Input v-model:value="subKeyFormData.id" />
+          <Input v-model="subKeyFormData.id" />
         </FormItem>
         <FormItem v-show="subKeyFormData.id" name="key" label="API key:">
           <span>{{ subKeyFormData.key }}</span>

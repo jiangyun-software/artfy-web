@@ -304,3 +304,101 @@ export function cutoutApi(data) {
     data: data,
   });
 }
+
+// ai作画风格列表
+export function aiPaintingStyleApi(type) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPaintingStyle/style/' + type,
+  });
+}
+
+// ai作画集合
+export function aiPaintingCollectionApi(params) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPainting',
+    params: params,
+  });
+}
+
+// ai作画删除
+export function aiPaintingDeleteApi(paintingId, imageId) {
+  return defHttp.delete<RestResult>({
+    url: '/artfy/aiPainting/' + paintingId + '/' + imageId,
+  });
+}
+
+// ai作画 我的收藏
+export function aiPaintingMyCollectApi(params) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPainting/collect',
+    params: params,
+  });
+}
+
+// ai作画 搜藏、取消收藏
+export function aiPaintingCollectApi(id, collected) {
+  return defHttp.put<RestResult>({
+    url: '/artfy/aiPainting/collect',
+    data: { id, collected },
+  });
+}
+
+// ai作画 提交
+export function aiPaintingSubmitApi(params) {
+  return defHttp.post<RestResult>({
+    url: '/artfy/aiPainting',
+    data: params,
+  });
+}
+
+// ai作画 详情
+export function aiPaintingDetailsApi(id) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPainting/' + id,
+  });
+}
+
+// ai作画 队列数量
+export function aiPaintingQueueApi(id) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/aiPainting/queue/' + id,
+  });
+}
+
+// 图生图 提交
+export function img2imgSubmitApi(params) {
+  return defHttp.post<RestResult>({
+    url: '/artfy/img2img',
+    data: params,
+  });
+}
+
+// 图生图 列表
+export function img2imgListApi(params) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/img2img',
+    params: params,
+  });
+}
+
+// 图生图 搜藏、取消收藏
+export function img2imgCollectApi(id, collected) {
+  return defHttp.put<RestResult>({
+    url: '/artfy/img2img/collect',
+    data: { id, collected },
+  });
+}
+
+// 图生图 删除
+export function img2imgDeleteApi(id) {
+  return defHttp.delete<RestResult>({
+    url: '/artfy/img2img/' + id,
+  });
+}
+
+// 图生图 详情
+export function img2imgDetailsApi(id) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/img2img/' + id,
+  });
+}
