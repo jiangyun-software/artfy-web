@@ -3,7 +3,12 @@
     <div class="top-wrap">
       <div class="top">
         <div class="left">
-          <video class="video1" style="width: 520px; height: 520px" controls :src="url"></video>
+          <video class="video1" style="width: 520px; height: 520px" controls :src="url">
+            <source
+              src="https://v9-cold1.douyinvod.com/b7cc09b11f4eaebd6291af7a29123368/63a04244/video/tos/cn/tos-cn-ve-15-alinc2/f914976fe4974d4da877e8cf15211364/?a=1128&ch=0&cr=0&dr=0&cd=0%7C0%7C0%7C0&cv=1&br=612&bt=612&cs=0&ds=3&ft=KQ9BF3UUmf.7daD0PD1YBa_3pt2GuNralCdcx4k01bnbEvjThb&mime_type=video_mp4&qs=0&rc=aThpOTNkOzg2PDY5Zzs0M0Bpajd1bjM6ZmZkOTMzNGkzM0AzXjZiLS8zXzMxLzEvNGE1YSM0bGxqcjRnaWBgLS1kLWFzcw==&l=2022121917513701020809707709024232&btag=88000&cdn_n80=1"
+              type="video/mp4"
+            />
+          </video>
         </div>
         <div class="right">
           <div class="title">视频翻译</div>
@@ -42,19 +47,28 @@
                 </div>
               </div>
               <!---->
-              <h4 class="i_editor_h4">
+
+              <div class="i_editor_h4">
+                <br />
                 <label class="el-checkbox is-checked" style="margin-right: 5px"> <input type="checkbox" v-model="removeBgAudio" aria-hidden="false" true-value="1" false-value="0" class="el-checkbox__original" /> </label>原视频静音
-              </h4>
+              </div>
             </div>
           </ul>
           <!---->
-          <div class="paste-wrap"><Input v-model:value="proparams.urls[0]" class="paste-input" placeholder="CTRL+V粘贴URL" /></div>
+          <div class="paste-wrap"
+            >示例:https://v.douyin.com/hLWpbPG/ <Button class="btn-item mobileupload" @click="preview()">预览<br /></Button><Input v-model:value="proparams.urls[0]" class="paste-input" placeholder="CTRL+V粘贴URL" />
+          </div>
+
           <div class="btn-group">
-            <Button class="btn-item pcupload btn-upload" @click="process()">
-              <span>提交</span>
+            <Button class="btn-item pcupload btn-upload">
+              <span>电脑上传</span>
+              <input type="file" accept="audio/mp4, video/mp4" @change="pcUploadChange($event)" />
             </Button>
+            <Button class="btn-item mobileupload" @click="process()">URL上传</Button>
+            <!-- <Button class="btn-item mobileupload" @click="preview()">预览</Button> -->
           </div>
           <div class="api" v-show="isShow">{{ processStatusMap[processStatus] }}</div>
+          <div class="time" v-show="isShowtime">开始时间 {{ strattime }} 结束时间 {{ endtime }}</div>
         </div>
       </div>
     </div>
@@ -77,9 +91,25 @@
     name: 'VideoTranslation',
     components: { Button, Input, Radio, RadioGroup, QrcodeVue, Modal, LoadingOutlined, Progress, ImageCompare, Slider },
     setup() {
+      const imgList = ref<any>([]); // { url: '1', progress: 20 },
+
+      //const cutoutWrapRef = ref();
+
+      var strattimeDate = new Date();
+
+      var countDateDiff = null;
+
+      var endtimeDate = new Date();
+
+      var strattime = ref('');
+
+      var endtime = ref('');
+
       const url = ref('');
 
       var isShow = ref(false);
+
+      var isShowtime = ref(false);
 
       var processStatus = ref('');
       //是否需要删除背景声
@@ -265,6 +295,11 @@
         proparams.urls[0] = s && s.length ? s[0] : null;
       };
 
+      const preview = () => {
+        getStrUrl();
+        window.open(proparams.urls[0]);
+      };
+
       //视频翻译
       const processing = ref(false);
       const process = () => {
@@ -303,7 +338,11 @@
               idProjectsparams.idWorks[0] = res.data.dataList[0].id;
               message.success('提交成功');
               //message.success('视频翻译 callback ' + res.callback);
+              //获取起始时间
+              strattimeDate = new Date();
+              strattime.value = strattimeDate.toLocaleString() + ':' + (strattimeDate.getSeconds() + 1);
               isShow.value = true;
+              isShowtime.value = false;
               let timer = setInterval(() => {
                 fun(timer);
               }, 5000);
@@ -327,14 +366,19 @@
                 //成功
                 message.success('视频翻译' + res.msg);
                 isShow.value = false;
+                isShowtime.value = true;
                 //message.success(res.data.content[0].videoUrl);
                 // 停止定时器
                 clearInterval(timer);
-
+                //获取结束时间
+                endtimeDate = new Date();
+                endtime.value = endtimeDate.toLocaleString() + ':' + (endtimeDate.getSeconds() + 1);
+                //countDateDiff = Math.ceil(Math.abs(endtimeDate.getTime() - strattimeDate.getTime()) / (1000 * 60 * 60 * 24));
                 url.value = res.data.content[0].videoUrl;
               } else {
                 //未成功
                 isShow.value = true;
+                isShowtime.value = false;
                 //message.success(res.data.content[0].url + '开始: ' + res.data.content[0].videoUrl + '素材准备中 ' + res.data.content[0].processStatus);
               }
             }
@@ -356,6 +400,90 @@
         });
       };
 
+      const pcUploadChange = (e) => {
+        if (e.target.files.length == 0) {
+          return false;
+        }
+        uploadAndCutout(e.target.files[0]);
+      };
+
+      const uploadAndCutout = (data) => {
+        getUploadSingnatureApi('universalCutout').then((res) => {
+          const image = { url: res.data.url, progress: 0, done: false, id: res.data.id };
+          imgList.value.push(image);
+          const params = new FormData();
+          params.append('key', res.data.key);
+          params.append('policy', res.data.policy);
+          params.append('OSSAccessKeyId', res.data.OSSAccessKeyId);
+          params.append('success_action_status', '200');
+          params.append('signature', res.data.signature);
+          params.append('file', data);
+          axios({
+            url: res.data.host,
+            method: 'post',
+            data: params,
+            headers: { 'Content-Type': 'multipart/form-data;charset=UTF-8' },
+            onUploadProgress: function (progress) {
+              if (progress.lengthComputable) {
+                imgList.value.find((item) => item.url == res.data.url).progress = Math.round((progress.loaded / progress.total) * 100);
+              }
+            },
+          }).then(() => {
+            // cutoutWrapRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // //佐糖抠图接口
+            // cutoutApi({ url: res.data.id, type: 'object' }).then((res3) => {
+            //   const img = imgList.value.find((item) => item.url == res.data.url);
+            //   img.url = res3.data.url;
+            //   img.done = true;
+            //   img.id = res3.data.id;
+            //});
+            message.success('电脑上传 视频翻译');
+            proparams.urls[0] = res.data.url;
+            proparams.lang = selectlang.value;
+            proparams.sourceLang = selectsourceLang.value;
+            proparams.wyVoiceParam = '{"id":' + selectComboIndex.value + '}';
+            if (removeBgAudio.value) {
+              proparams.removeBgAudio = 1;
+            } else {
+              proparams.removeBgAudio = 0;
+            }
+            if (selectSet.value == '0') {
+              proparams.wyNeedText = 1;
+              proparams.voice = 2;
+            } else if (selectSet.value == '1') {
+              proparams.wyNeedText = 0;
+            } else if (selectSet.value == '2') {
+              proparams.wyNeedText = 1;
+              proparams.voice = 3;
+            }
+
+            processing.value = true;
+            translateApi(proparams).then((res) => {
+              processing.value = false;
+              if (res.code == 200 || res.msg == 'success') {
+                videoInfo.idProject = res.data.idProject;
+                videoInfo.dataList = res.data.dataList;
+                idProjectsparams.idProjects[0] = res.data.idProject;
+                idProjectsparams.idWorks[0] = res.data.dataList[0].id;
+                message.success('提交成功');
+                //message.success('视频翻译 callback ' + res.callback);
+                //获取起始时间
+                strattimeDate = new Date();
+                strattime.value = strattimeDate.toLocaleString() + ':' + (strattimeDate.getSeconds() + 1);
+                isShow.value = true;
+                isShowtime.value = false;
+                let timer = setInterval(() => {
+                  fun(timer);
+                }, 5000);
+                // window.setInterval(() => {
+                //   setTimeout(processResult, 0);
+                // }, 30000);
+              }
+            });
+          });
+        });
+      };
+
       return {
         idProjectsparams,
         videoInfo,
@@ -365,12 +493,14 @@
         params,
         proparams,
         process,
+        preview,
         processResult,
         processing,
         Resultprocessing,
         fun,
         url,
         isShow,
+        isShowtime,
         processStatus,
         processStatusMap,
         getStrUrl,
@@ -383,6 +513,13 @@
         removeBgAudio,
         wyNeedText,
         selectSet,
+        strattime,
+        endtime,
+        strattimeDate,
+        endtimeDate,
+        countDateDiff,
+        pcUploadChange,
+        uploadAndCutout,
       };
     },
   });
@@ -448,6 +585,7 @@
               border-radius: 8px;
               border: none;
               font-size: 18px;
+              margin-top: 6px;
             }
 
             .paste-input:focus {
@@ -460,6 +598,14 @@
             }
           }
           .api {
+            color: red;
+            font-size: 18px;
+            margin-top: 16px;
+            cursor: pointer;
+            //display: none;
+          }
+
+          .time {
             color: red;
             font-size: 18px;
             margin-top: 16px;
