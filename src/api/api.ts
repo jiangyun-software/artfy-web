@@ -306,9 +306,9 @@ export function cutoutApi(data) {
 }
 
 // ai作画风格列表
-export function aiPaintingStyleApi() {
+export function aiPaintingStyleApi(type) {
   return defHttp.get<RestResult>({
-    url: '/artfy/aiPaintingStyle',
+    url: '/artfy/aiPaintingStyle/style/' + type,
   });
 }
 
@@ -362,5 +362,43 @@ export function aiPaintingDetailsApi(id) {
 export function aiPaintingQueueApi(id) {
   return defHttp.get<RestResult>({
     url: '/artfy/aiPainting/queue/' + id,
+  });
+}
+
+// 图生图 提交
+export function img2imgSubmitApi(params) {
+  return defHttp.post<RestResult>({
+    url: '/artfy/img2img',
+    data: params,
+  });
+}
+
+// 图生图 列表
+export function img2imgListApi(params) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/img2img',
+    params: params,
+  });
+}
+
+// 图生图 搜藏、取消收藏
+export function img2imgCollectApi(id, collected) {
+  return defHttp.put<RestResult>({
+    url: '/artfy/img2img/collect',
+    data: { id, collected },
+  });
+}
+
+// 图生图 删除
+export function img2imgDeleteApi(id) {
+  return defHttp.delete<RestResult>({
+    url: '/artfy/img2img/' + id,
+  });
+}
+
+// 图生图 详情
+export function img2imgDetailsApi(id) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/img2img/' + id,
   });
 }

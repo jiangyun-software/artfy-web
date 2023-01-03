@@ -53,6 +53,9 @@ export default {
         painting: {
           title: 'AI作画',
         },
+        img2img: {
+          title: '图生图',
+        },
       },
     },
     case: {

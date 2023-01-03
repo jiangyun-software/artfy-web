@@ -2,9 +2,9 @@
   <div class="content">
     <div class="tabs-wrap">
       <div class="tabs">
-        <router-link to=""><div class="tabs-item" :class="{ active: router.currentRoute.value.fullPath == '/AIPainting/painting' }">AI作画</div></router-link>
+        <router-link to="/aiPainting/painting"><div class="tabs-item" :class="{ active: router.currentRoute.value.fullPath == '/aiPainting/painting' }">AI作画</div></router-link>
+        <router-link to="/aiPainting/img2img/collection"><div class="tabs-item" :class="{ active: router.currentRoute.value.fullPath.startsWith('/aiPainting/img2img') }">图生图</div></router-link>
         <router-link to=""><div class="tabs-item" :class="{ active: router.currentRoute.value.fullPath == '' }">梦想生成器</div></router-link>
-        <router-link to=""><div class="tabs-item" :class="{ active: router.currentRoute.value.fullPath == '' }">图生图</div></router-link>
       </div>
     </div>
     <RouterView />

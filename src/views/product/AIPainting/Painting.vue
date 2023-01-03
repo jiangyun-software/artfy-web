@@ -120,14 +120,19 @@
               <div v-show="group.status == 2">
                 <div class="group-item">
                   <div v-for="image in group.images" :key="image" class="group-item-content">
-                    <img class="group-item-image" :src="image.image" alt="" @click="viewImage(group, image)" />
-                    <div class="hover">
-                      <div>
-                        <span class="icon-wrap" @click="deleteImage(group.id, image.id)"><img :src="deleteIcon" /></span>
-                      </div>
-                      <div>
-                        <span class="icon-wrap" @click="doCollect(image)"><img v-show="image.collected" :src="starIcon_active" /><img v-show="!image.collected" :src="starIcon_white" /></span>
-                        <span class="icon-wrap" style="margin-left: 8px" @click="downloadImage(image.image)"><img :src="downloadIcon" /></span>
+                    <div v-if="image.status == '2'" class="image-fail">
+                      <div class="image-fail-text">图片已被审核员拦截</div>
+                    </div>
+                    <div v-else class="image-success">
+                      <img class="group-item-image" :src="image.image" alt="" @click="viewImage(group, image)" />
+                      <div class="hover">
+                        <div>
+                          <span class="icon-wrap" @click="deleteImage(group.id, image.id)"><img :src="deleteIcon" /></span>
+                        </div>
+                        <div>
+                          <span class="icon-wrap" @click="doCollect(image)"><img v-show="image.collected" :src="starIcon_active" /><img v-show="!image.collected" :src="starIcon_white" /></span>
+                          <span class="icon-wrap" style="margin-left: 8px" @click="downloadImage(image.image)"><img :src="downloadIcon" /></span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -182,8 +187,8 @@
           <div class="img-details-info-value">{{ imageInfo.aiPainting.resolution }}</div>
           <div class="img-details-info-label">种子</div>
           <div class="img-details-info-value">{{ imageInfo.aiPainting.seed }}</div>
-          <div class="img-details-info-label">画面描述</div>
-          <div class="img-details-info-value">{{ imageInfo.aiPainting.tipWeight }}</div>
+          <div class="img-details-info-label">提示重量</div>
+          <div class="img-details-info-value">{{ imageInfo.aiPainting.tipWeight }}%</div>
           <div class="img-details-info-download"><button @click="downloadImage(imageInfo.image)">下载</button></div>
         </div>
       </div>
@@ -197,17 +202,17 @@
   import axios from 'axios';
   import settingIcon from '/@/assets/icons/setting.svg';
   import arrowIcon from '/@/assets/icons/arrow-down.svg';
-  import collectionIcon_black from '/@/assets/icons/collection_black.png';
-  import collectionIcon_white from '/@/assets/icons/collection_white.png';
-  import starIcon_white from '/@/assets/icons/star_white.png';
-  import starIcon_black from '/@/assets/icons/star_black.png';
-  import starIcon_active from '/@/assets/icons/star_active.png';
-  import deleteIcon from '/@/assets/icons/delete.png';
-  import downloadIcon from '/@/assets/icons/download.png';
-  import subtractIcon from '/@/assets/icons/subtract.png';
+  import collectionIcon_black from '/@/assets/icons/collection-black.svg';
+  import collectionIcon_white from '/@/assets/icons/collection-white.svg';
+  import starIcon_white from '/@/assets/icons/star-white.svg';
+  import starIcon_black from '/@/assets/icons/star-black.svg';
+  import starIcon_active from '/@/assets/icons/star-active.svg';
+  import deleteIcon from '/@/assets/icons/delete.svg';
+  import downloadIcon from '/@/assets/icons/download.svg';
+  import subtractIcon from '/@/assets/icons/subtract.svg';
   import searchIcon from '/@/assets/icons/search.svg';
   import randomIcon from '/@/assets/icons/random.png';
-  import plusIcon from '/@/assets/icons/plus.png';
+  import plusIcon from '/@/assets/icons/plus.svg';
   import randomGreenIcon from '/@/assets/icons/random-green.svg';
   import noDataImage from '/@/assets/images/noData.png';
 
@@ -256,7 +261,7 @@
 
       const style = ref<any>([]);
       const getPaintingStyle = () => {
-        aiPaintingStyleApi().then((res) => {
+        aiPaintingStyleApi('0').then((res) => {
           if (res.code == 200) {
             res.data[0].active = true;
             res.data[0].children[0].active = true;
@@ -311,7 +316,7 @@
       ]);
 
       const changeReferenceImage = (e) => {
-        getUploadSingnatureApi('AiPainting').then((res) => {
+        getUploadSingnatureApi('aiPainting').then((res) => {
           const params = new FormData();
           params.append('key', res.data.key);
           params.append('policy', res.data.policy);
@@ -346,7 +351,7 @@
               const unfinish = unfinishList[unfinishList.length - 1];
               queueTask = setInterval(() => {
                 aiPaintingDetailsApi(unfinish.id).then((res1) => {
-                  if (res1.code == 200 && res1.data.status == 2) {
+                  if (res1.code == 200 && res1.data?.status == 2) {
                     getCollection();
                   }
                 });
@@ -392,7 +397,13 @@
       };
 
       const downloadImage = (url) => {
-        window.open(url);
+        axios.get(url, { responseType: 'blob' }).then((res) => {
+          let url = window.URL.createObjectURL(res.data);
+          let a = document.createElement('a');
+          a.href = url;
+          a.download = new Date().getTime() + '.png';
+          a.click();
+        });
       };
 
       const submiting = ref(false);
@@ -1112,10 +1123,30 @@
                   cursor: pointer;
                 }
               }
+
+              .image-fail {
+                width: 212px;
+                min-height: 212px;
+                height: 100%;
+                position: relative;
+                border: solid 1px rgba(255, 255, 255, 0.5);
+                border-radius: 4px;
+
+                .image-fail-text {
+                  color: rgba(255, 255, 255, 0.5);
+                  width: 100%;
+                  text-align: center;
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                }
+              }
             }
 
             .group-item-content:hover .hover {
               display: flex;
+              color: white;
             }
           }
 
