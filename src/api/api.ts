@@ -157,10 +157,18 @@ export function comboApi() {
   });
 }
 
-// 获取oss上传签名
+// 获取oss图片上传签名
 export function getUploadSingnatureApi(product) {
   return defHttp.get<RestResult>({
     url: '/artfy/ali/getUploadSingnature',
+    params: { product: product },
+  });
+}
+
+// 获取oss文件上传签名
+export function getUploadFileSingnature(product) {
+  return defHttp.get<RestResult>({
+    url: '/artfy/ali/getUploadFileSingnature',
     params: { product: product },
   });
 }
