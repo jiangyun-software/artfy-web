@@ -166,7 +166,7 @@ export function getUploadSingnatureApi(product) {
 }
 
 // 获取oss文件上传签名
-export function getUploadFileSingnature(product) {
+export function getUploadFileSingnatureApi(product) {
   return defHttp.get<RestResult>({
     url: '/artfy/ali/getUploadFileSingnature',
     params: { product: product },
