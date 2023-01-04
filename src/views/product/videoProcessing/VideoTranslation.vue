@@ -81,7 +81,7 @@
   import { LoadingOutlined } from '@ant-design/icons-vue';
   import deleteIcon from '/@/assets/svg/delete.svg';
   import downloadIcon from '/@/assets/svg/download.svg';
-  import { getUploadSingnatureApi, getUploadKeyApi, getUploadFileApi, translateApi, translateResultApi, uploadImageByUrlApi, getDictDataByTypeApi } from '/@/api/api';
+  import { getUploadFileSingnatureApi, getUploadKeyApi, getUploadFileApi, translateApi, translateResultApi, uploadImageByUrlApi, getDictDataByTypeApi } from '/@/api/api';
   import axios from 'axios';
   import QrcodeVue from 'qrcode.vue';
   import { useUserStore } from '/@/store/modules/user';
@@ -400,6 +400,7 @@
         });
       };
 
+      //本地视频
       const pcUploadChange = (e) => {
         if (e.target.files.length == 0) {
           return false;
@@ -408,7 +409,7 @@
       };
 
       const uploadAndCutout = (data) => {
-        getUploadSingnatureApi('universalCutout').then((res) => {
+        getUploadFileSingnatureApi('universalCutout').then((res) => {
           const image = { url: res.data.url, progress: 0, done: false, id: res.data.id };
           imgList.value.push(image);
           const params = new FormData();
@@ -577,7 +578,6 @@
 
           .paste-wrap {
             margin-top: 20px;
-
             .paste-input {
               display: inline-block;
               height: 56px;
