@@ -19,10 +19,28 @@
       <div>啊欧，还没有画作，快去生成画作吧！</div>
     </div>
   </div>
+  <div ref="globalModal">
+    <Modal v-model:visible="imageDetailsVisible" :maskClosable="false" width="100%" wrap-class-name="full-modal" :getContainer="() => $refs.globalModal" class="jy-modal" :footer="null">
+      <div class="img-details">
+        <div class="img-details-wrap">
+          <img :src="imageInfo.image" alt="" />
+        </div>
+        <div class="img-details-info">
+          <div class="img-details-info-label" style="margin-top: 0px">参考图</div>
+          <div class="img-details-info-value"><img class="initImage" :src="imageInfo.initImage" /></div>
+          <div class="img-details-info-label">风格选择</div>
+          <div class="img-details-info-value">{{ imageInfo.style.label }}</div>
+          <div class="img-details-info-label">参考图差异度</div>
+          <div class="img-details-info-value">{{ imageInfo.guidanceScale }}%</div>
+          <div class="img-details-info-download"><button @click="downloadImage(imageInfo.image)">下载</button></div>
+        </div>
+      </div>
+    </Modal>
+  </div>
 </template>
 <script lang="ts">
   import { defineComponent, reactive, ref, nextTick, getCurrentInstance, onBeforeMount } from 'vue';
-  import { message } from 'ant-design-vue';
+  import { message, Modal } from 'ant-design-vue';
   import { img2imgListApi, img2imgCollectApi, img2imgDeleteApi } from '/@/api/api';
   import axios from 'axios';
   import { useRouter } from 'vue-router';
@@ -38,6 +56,7 @@
 
   export default defineComponent({
     name: 'Img2imgCollection',
+    components: { Modal },
     setup() {
       const router = useRouter();
 
@@ -46,6 +65,8 @@
         pageSize: 10,
         collected: true,
       });
+
+      const total = ref(0);
 
       const more = () => {
         pageParams.pageSize = pageParams.pageSize + 10;
@@ -135,6 +156,9 @@
         getList,
         more,
         pageParams,
+        imageInfo,
+        imageDetailsVisible,
+        total,
       };
     },
   });
@@ -267,6 +291,12 @@
           font-size: 16px;
         }
       }
+    }
+
+    .initImage {
+      max-height: 378px;
+      max-width: 212px;
+      object-fit: contain;
     }
   }
 </style>

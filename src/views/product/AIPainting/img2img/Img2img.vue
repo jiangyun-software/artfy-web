@@ -91,7 +91,7 @@
 
       const params = reactive({
         initImage: '',
-        guidanceScale: 75,
+        guidanceScale: 60,
         style: { id: 0 },
         totalPoint: 2,
       });

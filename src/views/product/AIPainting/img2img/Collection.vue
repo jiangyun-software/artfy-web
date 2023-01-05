@@ -15,9 +15,17 @@
               </div>
             </div>
           </div>
-          <div v-else class="painting">
+          <div v-if="image.status == 0" class="painting">
             <div class="queue">等待排队中（{{ image.queue }}人）</div>
             <div class="time">预计等待{{ Math.floor(image.queue * 0.2) }}分钟</div>
+          </div>
+          <div v-if="image.status == 3" class="error">
+            <div class="msg">{{ image.msg }}</div>
+            <div class="hover">
+              <div>
+                <span class="icon-wrap" @click="deleteImage(image.id)"><img :src="deleteIcon" /></span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -144,7 +152,7 @@
               const unfinish = unfinishList[unfinishList.length - 1];
               queueTask = setInterval(() => {
                 img2imgDetailsApi(unfinish.id).then((res1) => {
-                  if (res1.code == 200 && res1.data?.status == 2) {
+                  if (res1.code == 200 && res1.data?.status != 0) {
                     getCollection();
                   }
                 });
@@ -245,6 +253,21 @@
           width: 100%;
           text-align: center;
           color: rgba(255, 205, 26, 0.9);
+        }
+      }
+
+      .error {
+        position: relative;
+        height: 212px;
+        background: rgba(255, 255, 255, 0.16);
+        .msg {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          text-align: center;
+          color: rgba(255, 255, 255, 0.9);
         }
       }
     }
