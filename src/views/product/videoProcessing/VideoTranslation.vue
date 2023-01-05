@@ -55,16 +55,18 @@
             </div>
           </ul>
           <!---->
-          <div class="paste-wrap"
-            >示例:https://v.douyin.com/hLWpbPG/ <Button class="btn-item mobileupload" @click="preview()">预览<br /></Button><Input v-model:value="proparams.urls[0]" class="paste-input" placeholder="CTRL+V粘贴URL" />
+          <div>示例:https://v.douyin.com/hLWpbPG/</div>
+          <div class="paste-wrap">
+            <Input v-model:value="proparams.urls[0]" class="paste-input" placeholder="CTRL+V粘贴URL" />
+            <Button class="btn-preview" @click="preview()">预览</Button>
           </div>
 
           <div class="btn-group">
             <Button class="btn-item pcupload btn-upload">
-              <span>电脑上传</span>
+              <span>本地视频上传</span>
               <input type="file" accept="audio/mp4, video/mp4" @change="pcUploadChange($event)" />
             </Button>
-            <Button class="btn-item mobileupload" @click="process()">URL上传</Button>
+            <Button class="btn-item mobileupload" @click="process()">URL提交</Button>
             <!-- <Button class="btn-item mobileupload" @click="preview()">预览</Button> -->
           </div>
           <div class="api" v-show="isShow">{{ processStatusMap[processStatus] }}</div>
@@ -541,7 +543,7 @@
         }
         .right {
           flex: 1;
-          padding: 0px 130px 0px 130px;
+          padding: 0px 180px 0px 80px;
           .title {
             font-size: 70px;
             font-weight: 600;
@@ -577,7 +579,15 @@
           }
 
           .paste-wrap {
-            margin-top: 20px;
+            // margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            .btn-preview {
+              height: 56px;
+              border-radius: 8px;
+            }
+
             .paste-input {
               display: inline-block;
               height: 56px;
@@ -585,7 +595,6 @@
               border-radius: 8px;
               border: none;
               font-size: 18px;
-              margin-top: 6px;
             }
 
             .paste-input:focus {

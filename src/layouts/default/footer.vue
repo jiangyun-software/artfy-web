@@ -18,19 +18,19 @@
         <div class="group">
           <div class="title">抠图</div>
           <div class="items">
-            <div>通用抠图</div>
-            <div>人像抠图</div>
-            <div>头部抠图</div>
-            <div>物体抠图</div>
+            <router-link to="/product/cutout/universalCutout"><div class="product-group-item">通用抠图</div></router-link>
+            <router-link to="/product/cutout/portraitCutout"><div class="product-group-item">人像抠图</div></router-link>
+            <!-- <div>头部抠图</div> -->
+            <router-link to="/product/cutout/commodityCutout"><div class="product-group-item">物体抠图</div></router-link>
           </div>
         </div>
         <div class="group">
           <div class="title">AI图像处理</div>
           <div class="items">
-            <div>修复/去水印</div>
-            <div>人像清晰化</div>
-            <div>无损放大</div>
-            <div>美化处理</div>
+            <router-link to="/product/imageProcessing/repairEdit"><div class="product-group-item">修复/去水印</div></router-link>
+            <router-link to="/product/imageProcessing/colorize"><div class="product-group-item">照片上色</div></router-link>
+            <router-link to="/product/imageProcessing/superResolution"><div class="product-group-item">无损放大</div></router-link>
+            <router-link to="/product/imageProcessing/faceBeauty"><div class="product-group-item">智能美颜</div></router-link>
           </div>
         </div>
         <div class="group">
@@ -40,13 +40,14 @@
             <div>人像打码</div>
             <div>风格迁移</div>
             <div>抠图</div>
+            <router-link to="/product/videoProcessing/videoTranslation"><div class="product-group-item">视频翻译</div></router-link>
           </div>
         </div>
         <div class="group">
           <div class="title">艺术生成</div>
           <div class="items">
             <div>关键词生成画作</div>
-            <div>人像卡通化</div>
+            <router-link to="/product/artGeneration/anime"><div class="product-group-item">人像卡通化</div></router-link>
             <div>图片卡通化</div>
             <div>图片风格迁移</div>
             <div>照片变活</div>
@@ -171,5 +172,12 @@
     a {
       color: white;
     }
+  }
+  .product-group-item {
+    padding: 8px 0px;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    color: white;
   }
 </style>
