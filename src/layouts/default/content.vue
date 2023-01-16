@@ -1,5 +1,5 @@
 <template>
-  <div style="padding-top: 100px">
+  <div style="padding-top: 72px">
     <RouterView>
       <template #default="{ Component, route }">
         <transition

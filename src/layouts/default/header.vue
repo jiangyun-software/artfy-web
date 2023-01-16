@@ -98,7 +98,7 @@
   import { defineComponent, computed } from 'vue';
   import { useAppStore } from '/@/store/modules/app';
   import { useUserStore } from '/@/store/modules/user';
-  import logo_full from '/@/assets/images/logo_full.png';
+  import logo_full from '/@/assets/images/logo_full.svg';
   import logo_full_white from '/@/assets/images/logo_full_white.png';
   import { CaretDownFilled, CaretUpFilled } from '@ant-design/icons-vue';
   import { Popover } from 'ant-design-vue';
@@ -148,7 +148,7 @@
   .header {
     position: fixed;
     width: 100%;
-    height: 100px;
+    height: 72px;
     display: flex;
     background-color: white;
     // margin-bottom: 2px;
@@ -158,7 +158,7 @@
     .logo {
       width: 284px;
       text-align: right;
-      line-height: 100px;
+      line-height: 72px;
 
       img {
         display: inline;
