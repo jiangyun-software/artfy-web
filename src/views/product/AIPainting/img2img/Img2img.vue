@@ -7,7 +7,7 @@
           <div class="upload-icon"><img :src="plusIcon" alt="" /></div>
           <div class="upload-tips">上传参考图</div>
         </div>
-        <input class="upload-btn" type="file" @change="changeReferenceImage" />
+        <input class="upload-btn" type="file" accept="image/jpeg,image/png" @change="changeReferenceImage" />
       </div>
       <div class="right">
         <div class="title-wrap">
@@ -123,6 +123,11 @@
       };
 
       const changeReferenceImage = (e) => {
+        const fileType = e.target.files[0].type;
+        if (fileType != 'image/jpeg' && fileType != 'image/png') {
+          message.error('图片类型不支持');
+          return false;
+        }
         getUploadSingnatureApi('img2img').then((res) => {
           const p = new FormData();
           p.append('key', res.data.key);

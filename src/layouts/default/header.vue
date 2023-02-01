@@ -160,7 +160,7 @@
   import { defineComponent, computed } from 'vue';
   import { useAppStore } from '/@/store/modules/app';
   import { useUserStore } from '/@/store/modules/user';
-  import logo_full from '/@/assets/images/logo_full.png';
+  import logo_full from '/@/assets/images/logo_full.svg';
   import logo_full_white from '/@/assets/images/logo_full_white.png';
   import { CaretDownFilled, CaretUpFilled } from '@ant-design/icons-vue';
   import { Popover } from 'ant-design-vue';

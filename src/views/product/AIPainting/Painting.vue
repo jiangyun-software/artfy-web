@@ -4,94 +4,96 @@
       <div style="width: 100%; position: relative">
         <div style="display: flex">
           <div class="setting" :class="{ active: settingShow }" @click="settingShow = !settingShow"><img class="settingIcon" :src="settingIcon" alt="" /><span class="setting-text">参数设置</span><img class="arrowIcon" :src="arrowIcon" /></div>
-          <div class="keyword"><input v-model="settingParams.keyword" placeholder="请输入你想要的图片描述" /><img class="icon" :src="randomGreenIcon" /></div>
+          <div class="keyword"><input v-model="settingParams.keyword" placeholder="请输入你想要的图片描述" /><img class="icon" :src="randomGreenIcon" @click="round" :class="{ round: rounding }" /></div>
           <button class="submit" @click="submit">
             立即生成
             <span class="point">{{ settingParams.totalPoint }}点</span>
           </button>
         </div>
-        <div class="setting-content" v-show="settingShow">
-          <div class="setting-title">
-            <div class="divider-left"></div>
-            <div>风格选择</div>
-            <div class="setting-style-groups">
-              <div v-for="item in style" :key="item.id" class="setting-style-tab" :class="{ active: item.active }" @click="changeStyleTab(item)">{{ item.label }}</div>
-            </div>
-          </div>
-          <div class="setting-style-content">
-            <div v-for="item1 in style.find((item) => item.active)?.children || []" :key="item1.id" class="setting-style-item" :class="{ active: item1.active }" @click="changeStyleItem(item1)">
-              <img class="setting-style-item-img" :src="item1.image" alt="" />
-              <div class="setting-style-item-label">{{ item1.label }}</div>
-            </div>
-          </div>
-          <div class="setting-proportion">
-            <div class="setting-proportion-left" style="width: 540px">
-              <div class="setting-title"><div class="divider-left"></div>图像比例</div>
-              <div class="setting-proportion-content">
-                <div v-for="item in proportion" :key="item.id" class="setting-proportion-item" :class="{ active: item.active }" @click="changeProportion(item)">{{ item.text }}</div>
+        <transition name="slide">
+          <div class="setting-content" v-show="settingShow">
+            <div class="setting-title">
+              <div class="divider-left"></div>
+              <div>风格选择</div>
+              <div class="setting-style-groups">
+                <div v-for="item in style" :key="item.id" class="setting-style-tab" :class="{ active: item.active }" @click="changeStyleTab(item)">{{ item.label }}</div>
               </div>
             </div>
-            <div class="setting-proportion-center" style="width: 360px">
-              <div class="setting-title"><div class="divider-left"></div>分辨率</div>
-              <div class="setting-resolution">
-                <div v-for="item in proportion.find((item1) => item1.active).list" :key="item.id" class="setting-resolution-item" :class="{ active: item.active }" @click="changeResolution(item)">
-                  {{ item.resolution }} <div class="point" v-if="item.point > 0">{{ item.point }}点</div>
+            <div class="setting-style-content">
+              <div v-for="item1 in style.find((item) => item.active)?.children || []" :key="item1.id" class="setting-style-item" :class="{ active: item1.active }" @click="changeStyleItem(item1)">
+                <img class="setting-style-item-img" :src="item1.image" alt="" />
+                <div class="setting-style-item-label">{{ item1.label }}</div>
+              </div>
+            </div>
+            <div class="setting-proportion">
+              <div class="setting-proportion-left" style="width: 540px">
+                <div class="setting-title"><div class="divider-left"></div>图像比例</div>
+                <div class="setting-proportion-content">
+                  <div v-for="item in proportion" :key="item.id" class="setting-proportion-item" :class="{ active: item.active }" @click="changeProportion(item)">{{ item.text }}</div>
                 </div>
               </div>
-            </div>
-            <div class="setting-proportion-right">
-              <div class="setting-title"><div class="divider-left"></div>生成数量</div>
-              <div class="setting-quantity">
-                <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 1 }" @click="settingParams.quantity = 1">1 张</div>
-                <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 4 }" @click="settingParams.quantity = 4">4 张</div>
-                <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 6 }" @click="settingParams.quantity = 6">6 张</div>
-              </div>
-            </div>
-          </div>
-          <div class="divider-top"></div>
-          <div class="setting-params">
-            <div class="params-item" style="width: 620px">
-              <div class="setting-title">反向描述</div>
-              <div class="form-textarea" style="width: 86%">
-                <textarea rows="10" v-model="settingParams.reverseDescription"></textarea>
-              </div>
-            </div>
-            <div class="params-item" style="width: 200px">
-              <div class="setting-title">参考图</div>
-              <div class="params-image">
-                <div class="params-image-upload" v-show="!settingParams.referenceImage">
-                  <img :src="plusIcon" alt="" />
-                  <div>上传图片</div>
-                  <input type="file" @change="changeReferenceImage($event)" />
-                </div>
-                <div class="params-image-view" v-show="settingParams.referenceImage">
-                  <img class="view" :src="settingParams.referenceImage" alt="" />
-                  <div class="del-btn" @click="settingParams.referenceImage = ''">
-                    <img class="del-icon" :src="deleteIcon" alt="" />
+              <div class="setting-proportion-center" style="width: 360px">
+                <div class="setting-title"><div class="divider-left"></div>分辨率</div>
+                <div class="setting-resolution">
+                  <div v-for="item in proportion.find((item1) => item1.active).list" :key="item.id" class="setting-resolution-item" :class="{ active: item.active }" @click="changeResolution(item)">
+                    {{ item.resolution }} <div class="point" v-if="item.point > 0">{{ item.point }}点</div>
                   </div>
                 </div>
               </div>
-              <div class="guidanceScale">
-                <div class="guidanceScale-title">参考图相似度</div>
-                <Slider v-model:value="settingParams.guidanceScale" class="slider" :min="0.01" :max="1" :step="0.01" />
+              <div class="setting-proportion-right">
+                <div class="setting-title"><div class="divider-left"></div>生成数量</div>
+                <div class="setting-quantity">
+                  <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 1 }" @click="settingParams.quantity = 1">1 张</div>
+                  <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 4 }" @click="settingParams.quantity = 4">4 张</div>
+                  <div class="setting-quantity-item" :class="{ active: settingParams.quantity == 6 }" @click="settingParams.quantity = 6">6 张</div>
+                </div>
               </div>
             </div>
-            <div class="params-item" style="width: 240px">
-              <div class="setting-title">种子</div>
-              <div class="form-input-icon">
-                <input class="form-input" v-model="settingParams.seed" maxlength="9" @input="settingParams.seed = settingParams.seed.replace(/\D/g, '').replace(/^0{1,}/g, '')" />
-                <div class="icon-bg" @click="randomSeed()"><img class="icon" :src="randomIcon" alt="" /></div>
+            <div class="divider-top"></div>
+            <div class="setting-params">
+              <div class="params-item" style="width: 620px">
+                <div class="setting-title">反向描述</div>
+                <div class="form-textarea" style="width: 86%">
+                  <textarea rows="10" v-model="settingParams.reverseDescription"></textarea>
+                </div>
               </div>
-            </div>
-            <div class="params-item">
-              <div class="setting-title">提示重量</div>
-              <div class="slider-wrap">
-                <Slider v-model:value="settingParams.tipWeight" class="slider" :min="1" :max="100" />
-                <div class="slider-view">{{ settingParams.tipWeight }}%</div>
+              <div class="params-item" style="width: 200px">
+                <div class="setting-title">参考图</div>
+                <div class="params-image">
+                  <div class="params-image-upload" v-show="!settingParams.referenceImage">
+                    <img :src="plusIcon" alt="" />
+                    <div>上传图片</div>
+                    <input type="file" @change="changeReferenceImage($event)" accept="image/jpeg,image/png" />
+                  </div>
+                  <div class="params-image-view" v-show="settingParams.referenceImage">
+                    <img class="view" :src="settingParams.referenceImage" alt="" />
+                    <div class="del-btn" @click="settingParams.referenceImage = ''">
+                      <img class="del-icon" :src="deleteIcon" alt="" />
+                    </div>
+                  </div>
+                </div>
+                <div class="guidanceScale">
+                  <div class="guidanceScale-title">参考图相似度</div>
+                  <Slider v-model:value="settingParams.guidanceScale" class="slider" :min="0" :max="100" :step="10" />
+                </div>
+              </div>
+              <div class="params-item" style="width: 240px">
+                <div class="setting-title">种子</div>
+                <div class="form-input-icon">
+                  <input class="form-input" v-model="settingParams.seed" maxlength="9" @input="settingParams.seed = settingParams.seed.replace(/\D/g, '').replace(/^0{1,}/g, '')" />
+                  <div class="icon-bg" @click="randomSeed()"><img class="icon" :src="randomIcon" alt="" /></div>
+                </div>
+              </div>
+              <div class="params-item">
+                <div class="setting-title">提示重量</div>
+                <div class="slider-wrap">
+                  <Slider v-model:value="settingParams.tipWeight" class="slider" :min="0" :max="100" :step="10" />
+                  <div class="slider-view">{{ settingParams.tipWeight }}%</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </transition>
       </div>
     </div>
     <div class="content">
@@ -232,7 +234,7 @@
         seed: -1,
         quantity: 1,
         totalPoint: 2,
-        guidanceScale: 0.5,
+        guidanceScale: 60,
       });
 
       const collectionPage = reactive({
@@ -316,6 +318,11 @@
       ]);
 
       const changeReferenceImage = (e) => {
+        const fileType = e.target.files[0].type;
+        if (fileType != 'image/jpeg' && fileType != 'image/png') {
+          message.error('图片类型不支持');
+          return false;
+        }
         getUploadSingnatureApi('aiPainting').then((res) => {
           const params = new FormData();
           params.append('key', res.data.key);
@@ -443,6 +450,11 @@
         return proportion.find((item1) => item1.active).list.find((item2) => item2.active).point * settingParams.quantity;
       });
 
+      const tipWeightDeg = ref('50deg');
+      watch(settingParams, () => {
+        tipWeightDeg.value = (settingParams.tipWeight / 100) * 360 + 'deg';
+      });
+
       const randomSeed = () => {
         settingParams.seed = Math.ceil(Math.random() * 999999999);
         console.log(settingParams.seed);
@@ -470,6 +482,16 @@
         getCollection();
         getMyCollect();
       });
+
+      const rounding = ref(false);
+      const round = () => {
+        if (!rounding.value) {
+          rounding.value = true;
+          setTimeout(() => {
+            rounding.value = false;
+          }, 400);
+        }
+      };
 
       return {
         settingParams,
@@ -518,6 +540,9 @@
         randomSeed,
         viewImage,
         imageInfo,
+        round,
+        rounding,
+        tipWeightDeg,
       };
     },
   });
@@ -571,7 +596,7 @@
         border-radius: 4px;
         position: relative;
         height: 48px;
-        overflow: hidden;
+        // overflow: hidden;
 
         input {
           width: 100%;
@@ -581,6 +606,16 @@
           font-weight: 400;
           font-size: 14px;
           padding: 0px 50px 0px 24px;
+          border-radius: 4px;
+        }
+
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        input:focus {
+          outline: none;
+          border: solid 1px #8aff00;
         }
 
         .icon {
@@ -588,6 +623,7 @@
           top: 50%;
           right: 10px;
           transform: translateY(-50%);
+          // transform-origin: 0 0;
           cursor: pointer;
         }
       }
@@ -622,6 +658,7 @@
         border-radius: 4px;
         background-color: black;
         padding: 16px;
+        overflow: hidden;
 
         .setting-title {
           display: flex;
@@ -926,6 +963,9 @@
               color: rgba(255, 255, 255, 0.9);
               background: rgba(255, 255, 255, 0.16);
               padding: 0px 24px;
+              ::placeholder {
+                color: red;
+              }
             }
 
             input:focus-visible {
@@ -964,6 +1004,7 @@
             :deep(.slider) {
               .ant-slider-handle {
                 background: url('/@/assets/icons/slider-handle.png') !important;
+                transform: translateX(-50%) rotate(v-bind(tipWeightDeg)) !important;
                 overflow: visible;
                 margin-top: -8px;
                 width: 22px;
@@ -1034,7 +1075,7 @@
         width: 540px;
         border-radius: 4px;
         position: relative;
-        overflow: hidden;
+        // overflow: hidden;
 
         input {
           width: 100%;
@@ -1044,6 +1085,15 @@
           font-size: 14px;
           background: rgba(255, 255, 255, 0.16);
           padding-left: 48px;
+          border-radius: 4px;
+        }
+        input:focus {
+          outline-color: #8aff00;
+          outline-style: solid;
+          outline-width: 1px;
+        }
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.5);
         }
         .icon {
           position: absolute;
@@ -1303,5 +1353,39 @@
         }
       }
     }
+  }
+
+  .round {
+    animation: round 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes round {
+    0% {
+      transform: translateY(-50%) rotate(0deg);
+    }
+
+    100% {
+      transform: translateY(-50%) rotate(360deg);
+    }
+  }
+
+  @keyframes slide {
+    from {
+      height: 0px;
+    }
+    to {
+      height: 527px;
+    }
+  }
+
+  /* 2. 过渡类名 */
+  /* 开始 */
+  .slide-enter-active {
+    // animation: slide 0.2s;
+    animation: slide 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .slide-leave-active {
+    animation: slide 0.2s cubic-bezier(0.2, 0, 0.2, 1) reverse;
   }
 </style>
