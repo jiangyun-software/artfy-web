@@ -82,6 +82,8 @@
       line-height: normal;
       top: -58px;
       cursor: default;
+      box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.06);
+      border-radius: 8px;
 
       .concat-details {
         background-color: #f8f8f8;
@@ -132,6 +134,8 @@
       height: 86px;
       margin-top: -71px;
       cursor: default;
+      box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.06);
+      border-radius: 8px;
 
       .label {
         font-weight: 500;

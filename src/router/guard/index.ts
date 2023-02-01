@@ -96,7 +96,8 @@ function createHttpGuard(router: Router) {
 // Routing switch back to the top
 function createScrollGuard(router: Router) {
   const isHash = (href: string) => {
-    return /^#/.test(href);
+    // return /^#/.test(href);
+    return /^\//.test(href);
   };
 
   const body = document.body;

@@ -2,12 +2,12 @@
   <div class="scene-wrap">
     <div class="scene">
       <div class="title">场景应用</div>
-      <div class="description">无需phtoshop即可完成图片设计，批量处理电商白底图，一键美化图片，艺术图像处理等超多应用满足您的一应需求。</div>
+      <div class="description">无需photoshop即可完成图片设计，批量处理电商白底图，一键美化图片，艺术图像处理等超多应用满足您的一应需求。</div>
       <div class="tabs">
-        <div class="tabs-item" :class="{ active: active == 1 }" @click="active = 1"><img :src="scene1" alt="" />智能P图</div>
-        <div class="tabs-item" :class="{ active: active == 2 }" @click="active = 2"><img :src="scene2" alt="" />电子商务</div>
-        <div class="tabs-item" :class="{ active: active == 3 }" @click="active = 3"><img :src="scene3" alt="" />图片转艺术</div>
-        <div class="tabs-item" :class="{ active: active == 4 }" @click="active = 4"><img :src="scene4" alt="" />视频处理</div>
+        <div class="tabs-item" :class="{ active: active == 1 }" @mouseenter="active = 1"><img :src="scene1" alt="" />智能P图</div>
+        <div class="tabs-item" :class="{ active: active == 2 }" @mouseenter="active = 2"><img :src="scene2" alt="" />电子商务</div>
+        <div class="tabs-item" :class="{ active: active == 3 }" @mouseenter="active = 3"><img :src="scene3" alt="" />图片转艺术</div>
+        <div class="tabs-item" :class="{ active: active == 4 }" @mouseenter="active = 4"><img :src="scene4" alt="" />视频处理</div>
       </div>
       <div class="contents">
         <div class="contents-item" :class="{ active: active == 1 }">

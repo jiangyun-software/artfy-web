@@ -1,9 +1,10 @@
 <template>
   <div style="overflow: visible">
-    <Top />
-    <Partner />
-    <Example />
-    <AllApplication />
+<!--    <Top />-->
+<!--    <Partner />-->
+<!--    <Example />-->
+<!--    <AllApplication />-->
+    <NewTop />
     <Scene />
     <EasyApi />
     <Advantage />
@@ -22,10 +23,11 @@
   import EasyApi from './EasyApi.vue';
   import Advantage from './Advantage.vue';
   import ConcatBootom from './ConcatBootom.vue';
+  import NewTop from "./NewTop.vue";
 
   export default defineComponent({
     name: 'Home',
-    components: { Top, Concat, Example, Partner, AllApplication, Scene, EasyApi, Advantage, ConcatBootom },
+    components: { NewTop, Top, Concat, Example, Partner, AllApplication, Scene, EasyApi, Advantage, ConcatBootom },
     setup() {
       return {};
     },
