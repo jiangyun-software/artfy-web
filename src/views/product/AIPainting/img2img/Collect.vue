@@ -55,14 +55,14 @@
   import subtractIcon from '/@/assets/icons/subtract.svg';
 
   export default defineComponent({
-    name: 'Img2imgCollection',
+    name: 'Img2imgCollect',
     components: { Modal },
     setup() {
       const router = useRouter();
 
       const pageParams = reactive({
         pageNum: 1,
-        pageSize: 10,
+        pageSize: 50,
         collected: true,
       });
 

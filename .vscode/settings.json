@@ -141,5 +141,6 @@
     "brotli",
     "tailwindcss",
     "sider"
-  ]
+  ],
+  "svg.preview.background": "editor"
 }

@@ -56,6 +56,9 @@ export default {
         img2img: {
           title: '图生图',
         },
+        dreambooth: {
+          title: '梦想生成器',
+        },
       },
     },
     case: {

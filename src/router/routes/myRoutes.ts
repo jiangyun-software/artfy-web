@@ -227,6 +227,35 @@ export const myRoutes: AppRouteModule[] = [
               },
             ],
           },
+          {
+            path: 'dreambooth',
+            name: 'Dreambooth',
+            component: () => import('/@/views/product/AIPainting/dreambooth/Dreambooth.vue'),
+            redirect: 'aiPainting/dreambooth/collection',
+            meta: {
+              title: t('jy.page.product.AIPainting.dreambooth.title'),
+            },
+            children: [
+              {
+                path: 'artisticGeneration',
+                name: 'ArtisticGeneration',
+                component: () => import('/@/views/product/AIPainting/dreambooth/ArtisticGeneration.vue'),
+                meta: {
+                  title: t('jy.page.product.AIPainting.dreambooth.title'),
+                  footer: true,
+                },
+              },
+              {
+                path: 'modelRepository',
+                name: 'ModelRepository',
+                component: () => import('/@/views/product/AIPainting/dreambooth/ModelRepository.vue'),
+                meta: {
+                  title: t('jy.page.product.AIPainting.dreambooth.title'),
+                  footer: true,
+                },
+              },
+            ],
+          },
         ],
       },
     ],
