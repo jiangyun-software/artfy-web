@@ -69,7 +69,7 @@
       const total = ref(0);
 
       const more = () => {
-        pageParams.pageSize = pageParams.pageSize + 10;
+        pageParams.pageSize = pageParams.pageSize + 50;
         getMyCollect();
       };
 
