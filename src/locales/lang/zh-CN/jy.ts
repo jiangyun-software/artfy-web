@@ -90,6 +90,11 @@ export default {
           title: '图像修复/去水印',
         },
       },
+      ai: {
+        img2imgApi: {
+          title: '图生图',
+        },
+      },
     },
     price: {
       title: '价格',

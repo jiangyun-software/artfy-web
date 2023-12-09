@@ -38,6 +38,10 @@
           name: 'AI图像处理',
           subMenu: [{ name: '修复/去水印', path: '/apiDoc/imageProcessing/repairApi' }],
         },
+        {
+          name: 'AI图像生成',
+          subMenu: [{ name: '图生图', path: '/apiDoc/ai/img2img' }],
+        },
       ]);
 
       const selectedKeys = ref<string[]>([routerPath]);

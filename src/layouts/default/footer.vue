@@ -96,7 +96,7 @@
         </div>
       </div>
     </div>
-    <div class="filing"><a href="https://beian.miit.gov.cn">粤ICP备2022016758号-3</a></div>
+    <div class="filing"><a href="https://beian.miit.gov.cn">粤ICP备2022016758号-1</a></div>
   </div>
 </template>
 <script lang="ts">

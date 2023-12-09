@@ -347,6 +347,15 @@ export const myRoutes: AppRouteModule[] = [
           footer: true,
         },
       },
+      {
+        path: 'ai/img2img',
+        name: 'Img2imgApi',
+        component: () => import('/@/views/apidoc/ai/Img2imgApi.vue'),
+        meta: {
+          title: t('jy.page.apidoc.ai.img2imgApi.title'),
+          footer: true,
+        },
+      },
     ],
   },
   {
